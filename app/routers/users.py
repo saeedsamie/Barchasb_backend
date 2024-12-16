@@ -1,21 +1,39 @@
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
+from fastapi import APIRouter, HTTPException
 
-from app.database import get_db
-from app.schemas.user import UserCreate, UserResponse
-from app.services.user_service import create_user, authenticate_user
+from app.schemas.user import User
 
 router = APIRouter()
 
+users_db = {}
 
-@router.post("/register", response_model=UserResponse)
-def register(user: UserCreate, db: Session = Depends(get_db)):
-    return create_user(db, user)
+
+@router.post("/signup")
+def signup(user: User):
+    if user.username in users_db:
+        raise HTTPException(status_code=400, detail="User already exists")
+    users_db[user.username] = user
+    return {"message": "User created successfully"}
 
 
 @router.post("/login")
-def login(username: str, password: str, db: Session = Depends(get_db)):
-    user = authenticate_user(db, username, password)
+def login(username: str, password: str):
+    user = users_db.get(username)
+    if not user or user.password != password:
+        raise HTTPException(status_code=401, detail="Invalid credentials")
+    return {"message": "Login successful"}
+
+
+@router.get("/me")
+def get_user(username: str):
+    user = users_db.get(username)
     if not user:
-        raise HTTPException(status_code=400, detail="Invalid credentials")
-    return {"message": "Login successful", "user": user.username}
+        raise HTTPException(status_code=404, detail="User not found")
+    return user
+
+
+@router.post("/logout")
+def logout(username: str):
+    if username not in users_db:
+        raise HTTPException(status_code=404, detail="User not found")
+    # Logic for invalidating session or token can go here
+    return {"message": f"User {username} successfully logged out"}

@@ -1,14 +1,14 @@
 from pydantic import BaseModel
 
 
-class TaskCreate(BaseModel):
-    description: str
-    assigned_to: int
-
-
-class TaskResponse(BaseModel):
+class Task(BaseModel):
     id: int
+    title: str
     description: str
+    total_labels: int = 0
 
-    class Config:
-        orm_mode = True
+
+class Submission(BaseModel):
+    task_id: int
+    user: str
+    label: str

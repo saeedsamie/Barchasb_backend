@@ -1,14 +1,7 @@
 from pydantic import BaseModel
 
 
-class UserCreate(BaseModel):
+class User(BaseModel):
     username: str
     password: str
-
-
-class UserResponse(BaseModel):
-    id: int
-    username: str
-
-    class Config:
-        orm_mode = True
+    points: int = 0
