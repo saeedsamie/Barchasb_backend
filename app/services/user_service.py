@@ -1,8 +1,6 @@
 from passlib.context import CryptContext
-from sqlalchemy.orm import Session
 
-from app.models.user import User
-from app.schemas.user import UserCreate
+from app.schemas.user import UserCreate, User
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -11,17 +9,13 @@ def get_password_hash(password):
     return pwd_context.hash(password)
 
 
-def create_user(db: Session, user: UserCreate):
+def create_user(user: UserCreate):
+    print(user)
+    print(user.username)
+    print(user.password)
     hashed_password = get_password_hash(user.password)
-    db_user = User(username=user.username, hashed_password=hashed_password)
-    db.add(db_user)
-    db.commit()
-    db.refresh(db_user)
-    return db_user
+    return User(username=user.username, password=hashed_password)
 
 
-def authenticate_user(db: Session, username: str, password: str):
-    user = db.query(User).filter(User.username == username).first()
-    if user and pwd_context.verify(password, user.hashed_password):
-        return user
-    return None
+def verify_password(plain_password: str, hashed_password: str) -> bool:
+    return pwd_context.verify(plain_password, hashed_password)

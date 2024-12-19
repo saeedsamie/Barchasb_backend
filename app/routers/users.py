@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException
 
 from app.schemas.user import User
+from app.services.user_service import create_user
 
 router = APIRouter()
 
@@ -11,8 +12,9 @@ users_db = {}
 def signup(user: User):
     if user.username in users_db:
         raise HTTPException(status_code=400, detail="User already exists")
-    users_db[user.username] = user
-    return {"message": "User created successfully"}
+    users_db.update(create_user(user).dict())
+    print(users_db)
+    return {"message": f"User {user} created successfully"}
 
 
 @router.post("/login")
