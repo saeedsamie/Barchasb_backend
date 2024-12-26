@@ -16,3 +16,4 @@ def create_user(user: UserCreate) -> User:
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     return pwd_context.verify(plain_password, hashed_password)
+

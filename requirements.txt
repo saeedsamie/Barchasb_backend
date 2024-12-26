@@ -1,7 +1,8 @@
-fastapi
+fastapi~=0.115.6
 uvicorn
-sqlalchemy
-pydantic
-passlib[bcrypt]
+sqlalchemy~=2.0.36
+pydantic~=2.10.4
+passlib[bcrypt]~=1.7.4
 python-dotenv
-python-jose[cryptography]
+python-jose
+starlette~=0.41.3
