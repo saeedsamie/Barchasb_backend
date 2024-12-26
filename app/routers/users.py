@@ -62,11 +62,11 @@ def get_current_user(token: str = Depends(oauth2_scheme)):
 
 
 @router.get("/me")
-def get_user(username: str):
-    user = users_db.get(username)
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-    return user
+def get_user_info(current_user: str = Depends(get_current_user)):
+    user_data = users_db.get(current_user)
+    if not user_data:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+    return {"username": current_user, "points": user_data.get("points")}
 
 
 @router.post("/logout")

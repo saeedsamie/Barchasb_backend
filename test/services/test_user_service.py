@@ -116,3 +116,19 @@ def test_protected_route_with_expired_token(monkeypatch):
     # Assert unauthorized due to expired token
     assert response.status_code == 401
     assert response.json()["detail"] == "Invalid or expired token"
+
+
+def test_get_user_info_success():
+    # Pre-signup a user
+    client.post("/api/v1/auth/signup", json={"username": "test_user", "password": "SecureP@ssw0rd!"})
+
+    # Login to get the token
+    login_response = client.post("/api/v1/auth/login", json={"username": "test_user", "password": "SecureP@ssw0rd!"})
+    access_token = login_response.json()["access_token"]
+
+    # Fetch user info
+    headers = {"Authorization": f"Bearer {access_token}"}
+    response = client.get("/api/v1/auth/me", headers=headers)
+
+    assert response.status_code == 200
+    assert response.json() == {"username": "test_user", "points": 0}
