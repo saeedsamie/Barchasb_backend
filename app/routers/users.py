@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException
 from starlette import status
 
 from app.schemas.user import User, UserCreate
-from app.services.user_service import verify_password
+from app.services.user_service import verify_password, create_user
 
 router = APIRouter()
 
@@ -13,17 +13,17 @@ users_db = dict()
 def signup(user: UserCreate):
     if user.username in users_db:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail='Username already exists')
-    users_db.update({user.username: {'password': user.password, 'points': 0}})
-    return {"message": "User created successfully", "username": user.username}
+    new_user = create_user(user)
+    users_db.update({new_user.username: {'password': new_user.password, 'points': 0}})
+    return {"message": "User created successfully", "username": new_user.username}
 
 
 @router.post("/login")
 def login(user: User):
-    print(users_db)
-    if users_db[user.username]:
-        if verify_password(user.password, users_db[user.username]['password']):
-            return {"message": "Login successful"}
-    raise HTTPException(status_code=401, detail="Invalid credentials")
+    user_data = users_db.get(user.username)
+    if not user_data or not verify_password(user.password, user_data['password']):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Invalid credentials')
+    return {"message": "Login successful", "username": user.username}
 
 
 @router.get("/me")
