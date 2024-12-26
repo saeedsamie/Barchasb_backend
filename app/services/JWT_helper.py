@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 
-from jose import jwt, JWTError
+from fastapi import HTTPException
+from jose import jwt, JWTError, ExpiredSignatureError
 
 SECRET_KEY = "your-secret-key"  # Replace with a secure key in production
 ALGORITHM = "HS256"
@@ -17,6 +18,11 @@ def create_access_token(data: dict):
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
 
+def create_expired_access_token(payload):
+    return jwt.encode({"sub": payload["sub"], "exp": datetime.utcnow() - timedelta(minutes=1)}, SECRET_KEY,
+                      algorithm=ALGORITHM)
+
+
 def decode_access_token(token: str):
     """
     Decodes and validates a JWT token.
@@ -24,5 +30,13 @@ def decode_access_token(token: str):
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         return payload
+    except ExpiredSignatureError:
+        raise HTTPException(
+            status_code=401,
+            detail="Token has expired"
+        )
     except JWTError:
-        return None
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid token"
+        )

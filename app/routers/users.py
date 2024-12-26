@@ -3,7 +3,7 @@ from fastapi.security import OAuth2PasswordBearer
 from starlette import status
 
 from app.schemas.user import User, UserCreate
-from app.services.JWT_helper import create_access_token, decode_access_token
+from app.services.JWT_helper import create_access_token, decode_access_token, create_expired_access_token
 from app.services.user_service import verify_password, create_user
 
 router = APIRouter()
@@ -70,8 +70,16 @@ def get_user_info(current_user: str = Depends(get_current_user)):
 
 
 @router.post("/logout")
-def logout(username: str):
-    if username not in users_db:
-        raise HTTPException(status_code=404, detail="User not found")
-    # Logic for invalidating session or token can go here
-    return {"message": f"User {username} successfully logged out"}
+def logout(token: str = Depends(oauth2_scheme)):
+    """
+    Invalidate the current token by creating an expired token.
+    """
+    # Decode the current token to extract user information
+    payload = decode_access_token(token)
+    if not payload:
+        raise HTTPException(status_code=401, detail="Invalid token")
+
+    # Create a new token with an immediate expiration
+    expired_token = create_expired_access_token(payload=payload)
+
+    return {"message": "Successfully logged out", "expired_token": expired_token}

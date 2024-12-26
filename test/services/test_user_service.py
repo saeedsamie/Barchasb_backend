@@ -1,3 +1,4 @@
+import time
 from datetime import datetime, timedelta
 
 from fastapi import FastAPI
@@ -115,7 +116,7 @@ def test_protected_route_with_expired_token(monkeypatch):
 
     # Assert unauthorized due to expired token
     assert response.status_code == 401
-    assert response.json()["detail"] == "Invalid or expired token"
+    assert response.json()["detail"] == "Token has expired"
 
 
 def test_get_user_info_success():
@@ -132,3 +133,45 @@ def test_get_user_info_success():
 
     assert response.status_code == 200
     assert response.json() == {"username": "test_user", "points": 0}
+
+
+def test_logout_success():
+    # Pre-signup a user
+    client.post("/api/v1/auth/signup", json={"username": "test_user", "password": "SecureP@ssw0rd!"})
+
+    # Login to get the token
+    login_response = client.post("/api/v1/auth/login", json={"username": "test_user", "password": "SecureP@ssw0rd!"})
+    access_token = login_response.json()["access_token"]
+
+    # Logout with the token
+    headers = {"Authorization": f"Bearer {access_token}"}
+    logout_response = client.post("/api/v1/auth/logout", headers=headers)
+
+    assert logout_response.status_code == 200
+    assert "expired_token" in logout_response.json()
+    assert logout_response.json()["message"] == "Successfully logged out"
+
+
+def test_access_with_expired_token():
+    # Pre-signup a user
+    client.post("/api/v1/auth/signup", json={"username": "test_user", "password": "SecureP@ssw0rd!"})
+
+    # Login to get the token
+    login_response = client.post("/api/v1/auth/login", json={"username": "test_user", "password": "SecureP@ssw0rd!"})
+    access_token = login_response.json()["access_token"]
+    print(access_token)
+
+    # Logout with the token
+    headers = {"Authorization": f"Bearer {access_token}"}
+    logout_response = client.post("/api/v1/auth/logout", headers=headers)
+    expired_token = logout_response.json()["expired_token"]
+    print(expired_token)
+
+    # Use the expired token to access a protected route
+    headers = {"Authorization": f"Bearer {expired_token}"}
+    response = client.get("/api/v1/auth/protected-route", headers=headers)
+    print(response)
+
+    # Assert unauthorized due to expired token
+    assert response.status_code == 401
+    assert response.json()["detail"] == "Token has expired"
