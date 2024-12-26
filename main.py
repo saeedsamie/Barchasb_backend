@@ -4,9 +4,9 @@ from app.routers import users, tasks, leaderboard
 
 app = FastAPI()
 
-app.include_router(users.router, prefix="/auth", tags=["auth"])
-app.include_router(tasks.router, prefix="/tasks", tags=["tasks"])
-app.include_router(leaderboard.router, prefix="/leaderboard", tags=["leaderboard"])
+app.include_router(users.router, prefix="/api/v1/auth", tags=["auth"])
+app.include_router(tasks.router, prefix="/api/v1/tasks", tags=["tasks"])
+app.include_router(leaderboard.router, prefix="/api/v1/leaderboard", tags=["leaderboard"])
 
 # Example tasks for demonstration
 tasks_db = {
