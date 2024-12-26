@@ -8,5 +8,5 @@ class User(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     username = Column(String, unique=True, index=True)
-    hashed_password = Column(String)
-    role = Column(String, default="contributor")
+    hashed_password = Column(String, nullable=False)
+    # role = Column(String, default="contributor")

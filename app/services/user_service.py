@@ -10,9 +10,6 @@ def get_password_hash(password):
 
 
 def create_user(user: UserCreate):
-    print(user)
-    print(user.username)
-    print(user.password)
     hashed_password = get_password_hash(user.password)
     return User(username=user.username, password=hashed_password)
 
