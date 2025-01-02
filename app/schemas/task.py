@@ -11,6 +11,8 @@ class Task(BaseModel):
     id: int
     type: int
     data: dict
+    title: str
+    description: str
     point: int = 10
     tags: str = ''
 

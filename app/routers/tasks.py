@@ -27,7 +27,14 @@ submissions_db = []
 # Fetch task feed
 @router.get("/feed", response_model=List[Task])
 def get_task_feed(limit: int = 2, current_user: dict = Depends(get_current_user)):
-    tasks = [Task(**task) for task in tasks_db.values() if task["status"] == "new"][:limit]
+    tasks = [task for task in tasks_db.values() if task["status"] == "new"][:limit]
+    print(tasks)
+    for task in tasks:
+        task.update(task_types.get(task.get('type')))
+    print(tasks)
+    tasks = [Task(**task) for task in tasks]
+    print(tasks)
+
     if not tasks:
         raise HTTPException(status_code=404, detail="No tasks available")
     return tasks
