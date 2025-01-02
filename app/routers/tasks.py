@@ -1,37 +1,63 @@
-from fastapi import APIRouter, HTTPException
+from typing import List
 
-from app.schemas.task import Submission
+from fastapi import APIRouter, HTTPException, Depends
+
+from app.routers.users import get_current_user
+from app.schemas.task import Task, Submission
 
 router = APIRouter()
 
-tasks_db = {}
-submissions_db = {}
+task_types = {
+    0: {'title': "Automatic Speech Recognition", 'description': 'Write what you hear'},
+    1: {'title': "Word Recognition", 'description': 'Word Recognition'},
+    2: {'title': "Sentence Recognition", 'description': 'Word Recognition'}
+}
+# Mock database
+tasks_db = {
+    1: {"id": 1, "type": 0, "data": {"audio_url": "url/to/audio1"}, "point": 10, "tags": "ASR", "status": "new"},
+    2: {"id": 2, "type": 1, "data": {"image_url": "url/to/image1", "word": "example"}, "point": 10, "tags": "Word OCR",
+        "status": "new"},
+    3: {"id": 3, "type": 2, "data": {"image_url": "url/to/image2", "sentence": "Recognize this sentence"}, "point": 10,
+        "tags": "Sentence OCR", "status": "new"}
+}
+
+submissions_db = []
 
 
-@router.get("/")
-def get_tasks():
-    return list(tasks_db.values())
+# Fetch task feed
+@router.get("/feed", response_model=List[Task])
+def get_task_feed(limit: int = 2, current_user: dict = Depends(get_current_user)):
+    tasks = [Task(**task) for task in tasks_db.values() if task["status"] == "new"][:limit]
+    if not tasks:
+        raise HTTPException(status_code=404, detail="No tasks available")
+    return tasks
 
 
-@router.get("/{task_id}")
-def get_task(task_id: int):
+# Submit a completed task
+@router.post("/submit", response_model=dict)
+def submit_task(submission: Submission, current_user: dict = Depends(get_current_user)):
+    task = tasks_db.get(submission.task_id)
+    if not task:
+        raise HTTPException(status_code=404, detail="Task not found")
+    # Create a new submission
+    new_submission = submission.dict()
+    submissions_db.append(new_submission)
+    # Move task to completed state
+    tasks_db[submission.task_id]["status"] = "completed"
+    return {"task_id": submission.task_id, "status": "submitted"}
+
+
+# Report a corrupted task
+# Report a corrupted task
+@router.post("/report", response_model=dict)
+def report_task(report: dict, current_user: dict = Depends(get_current_user)):
+    task_id = report.get("task_id")
+
     task = tasks_db.get(task_id)
     if not task:
         raise HTTPException(status_code=404, detail="Task not found")
-    return task
 
+    # Mark the task as corrupted
+    task["status"] = "corrupted"
 
-@router.post("/{task_id}/submit")
-def submit_task(task_id: int, submission: Submission):
-    if task_id not in tasks_db:
-        raise HTTPException(status_code=404, detail="Task not found")
-    submissions_db.setdefault(task_id, []).append(submission)
-    tasks_db[task_id].total_labels += 1
-    return {"message": "Submission recorded"}
-
-
-@router.post("/report")
-def report_task(task_id: int, reason: str):
-    if task_id not in tasks_db:
-        raise HTTPException(status_code=404, detail="Task not found")
-    return {"message": "Task reported", "reason": reason}
+    return {"task_id": task_id, "status": "reported"}
