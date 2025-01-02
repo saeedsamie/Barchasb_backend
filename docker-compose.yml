@@ -3,8 +3,8 @@ version: '3.9'
 services:
   backend:
     build:
-      context: docker
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: dockerfile
     ports:
       - "8000:8000"
     volumes:
