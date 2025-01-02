@@ -16,34 +16,31 @@ def test_get_task_feed():
     assert response.status_code == 200
     data = response.json()
     assert len(data) > 0
-    assert data[0]["id"] == 1
-    assert data[0]["type"] == 0
-    assert data[0]["tags"] == "ASR"
 
 
 def test_submit_task():
     submission = {
         "id": 1,
         "user_id": 1,
-        "task_id": 1,
+        "task_id": 30418,
         "content": {"transcription": "This is a test"}
     }
     response = client.post("/api/v1/tasks/submit", json=submission, headers={"Authorization": f"Bearer {access_token}"})
     assert response.status_code == 200
     data = response.json()
-    assert data["task_id"] == 1
+    assert data["task_id"] == 30418
     assert data["status"] == "submitted"
-    assert tasks_db[1]["status"] == "completed"
+    assert tasks_db[30418]["status"] == "completed"
 
 
 def test_report_task():
-    report = {"task_id": 2}
+    report = {"task_id": 30418}
     response = client.post("/api/v1/tasks/report", json=report, headers={"Authorization": f"Bearer {access_token}"})
     assert response.status_code == 200
     data = response.json()
-    assert data["task_id"] == 2
+    assert data["task_id"] == 30418
     assert data["status"] == "reported"
-    assert tasks_db[2]["status"] == "corrupted"
+    assert tasks_db[30418]["status"] == "corrupted"
 
 
 def test_get_empty_task_feed():

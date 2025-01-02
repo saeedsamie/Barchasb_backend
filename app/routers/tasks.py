@@ -4,6 +4,7 @@ from fastapi import APIRouter, HTTPException, Depends
 
 from app.routers.users import get_current_user
 from app.schemas.task import Task, Submission
+from db import MOCKING_DATABASE
 
 router = APIRouter()
 
@@ -13,13 +14,7 @@ task_types = {
     2: {'title': "Sentence Recognition", 'description': 'Word Recognition'}
 }
 # Mock database
-tasks_db = {
-    1: {"id": 1, "type": 0, "data": {"audio_url": "url/to/audio1"}, "point": 10, "tags": "ASR", "status": "new"},
-    2: {"id": 2, "type": 1, "data": {"image_url": "url/to/image1", "word": "example"}, "point": 10, "tags": "Word OCR",
-        "status": "new"},
-    3: {"id": 3, "type": 2, "data": {"image_url": "url/to/image2", "sentence": "Recognize this sentence"}, "point": 10,
-        "tags": "Sentence OCR", "status": "new"}
-}
+tasks_db = MOCKING_DATABASE
 
 submissions_db = []
 
