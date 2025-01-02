@@ -48,7 +48,6 @@ def submit_task(submission: Submission, current_user: dict = Depends(get_current
 
 
 # Report a corrupted task
-# Report a corrupted task
 @router.post("/report", response_model=dict)
 def report_task(report: dict, current_user: dict = Depends(get_current_user)):
     task_id = report.get("task_id")
