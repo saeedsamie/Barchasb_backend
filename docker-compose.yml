@@ -10,3 +10,35 @@ services:
     volumes:
       - .:/app
     restart: unless-stopped
+  postgres:
+    image: postgres:15  # PostgreSQL version
+    container_name: postgres_server
+    restart: always
+    environment:
+      POSTGRES_USER: admin         # Replace with your desired username
+      POSTGRES_PASSWORD: admin     # Replace with your desired password
+      POSTGRES_DB: barchasb_db      # Replace with your database name
+    ports:
+      - "5432:5432"                        # Expose PostgreSQL on default port
+    volumes:
+      - postgres_data:/var/lib/postgresql/data  # Persist PostgreSQL data
+
+  pgadmin:
+    image: dpage/pgadmin4                  # PGAdmin image
+    container_name: pgadmin
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@example.com  # Admin email for PGAdmin
+      PGADMIN_DEFAULT_PASSWORD: admin          # Admin password for PGAdmin
+    ports:
+      - "5050:80"                             # Expose PGAdmin on port 5050
+    depends_on:
+      - postgres                             # Ensure PostgreSQL starts before PGAdmin
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin        # Persist PGAdmin data
+
+volumes:
+  postgres_data:
+    driver: local                            # Volume for PostgreSQL data
+  pgadmin_data:
+    driver: local                            # Volume for PGAdmin data
