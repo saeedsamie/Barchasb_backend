@@ -6,3 +6,5 @@ passlib[bcrypt]~=1.7.4
 python-dotenv
 python-jose
 starlette~=0.41.3
+pytest~=8.3.4
+Werkzeug~=3.1.3

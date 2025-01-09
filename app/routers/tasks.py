@@ -13,7 +13,7 @@ task_types = {
     1: {'title': "Word Recognition", 'description': 'Word Recognition'},
     2: {'title': "Sentence Recognition", 'description': 'Word Recognition'}
 }
-# Mock database
+# Mock test_database
 tasks_db = MOCKING_DATABASE
 
 submissions_db = []
