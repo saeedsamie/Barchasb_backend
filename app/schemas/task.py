@@ -1,24 +1,31 @@
+from typing import Optional, List
+from uuid import UUID
+
 from pydantic import BaseModel
 
 
-class TaskType:
-    ASR_Task = 0
-    Word_OCR = 1
-    Sentence_OCR = 2
-
-
-class Task(BaseModel):
-    id: int
-    type: int
+class TaskBase(BaseModel):
+    id: Optional[UUID]
+    type: str
     data: dict
     title: str
     description: str
     point: int = 10
-    tags: str = ''
+    tags: Optional[List[str]] = []
+
+    class Config:
+        from_attributes = True
 
 
-class Submission(BaseModel):
-    id: int
-    user_id: int
-    task_id: int
-    content: dict
+class TaskCreate(BaseModel):
+    type: str
+    data: dict
+    title: str = ""
+    description: str = ""
+    point: int
+    tags: Optional[List[str]] = []
+
+
+class TaskResponse(BaseModel):
+    status: str
+    task_id: UUID
