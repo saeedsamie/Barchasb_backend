@@ -1,12 +1,19 @@
 import uuid
 
 import pytest
-from sqlalchemy.orm import Session
+from sqlalchemy import create_engine
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import Session, sessionmaker
 
-from app.database import Base, engine
+from app.config import settings
 from app.models.label import Label
 from app.models.task import Task
 from app.models.user import User
+
+engine = create_engine(settings.TEST_DATABASE_URL)
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+Base = declarative_base()
+Base.metadata.create_all(engine)
 
 
 @pytest.fixture(scope="module")
