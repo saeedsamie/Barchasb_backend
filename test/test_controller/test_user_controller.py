@@ -1,4 +1,5 @@
 import pytest
+
 from app.DatabaseManager import DatabaseManager, TEST_DB_URL
 from app.controller.user_controller import (
     create_user,

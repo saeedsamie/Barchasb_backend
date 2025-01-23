@@ -4,13 +4,13 @@ from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.orm import Session
 
 from app.DatabaseManager import DatabaseManager, PROD_DB_URL
-from app.schemas.task import TaskCreate, TaskResponse
-from app.schemas.taskReport import TaskReportCreate
 from app.controller import (
     add_task,
     get_task_feed,
     report_task,
 )
+from app.schemas.task import TaskCreate, TaskResponse
+from app.schemas.taskReport import TaskReportCreate
 
 # Initialize the database manager
 db_manager = DatabaseManager(PROD_DB_URL)

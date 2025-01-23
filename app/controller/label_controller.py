@@ -2,9 +2,7 @@ import uuid
 
 from sqlalchemy.orm import Session
 
-from app.models.Task import Task
 from app.models.TaskLabel import TaskLabel
-from app.models.User import User
 
 
 def submit_task(db: Session, label: TaskLabel):

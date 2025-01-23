@@ -7,10 +7,6 @@ from app.exceptions.UserAlreadyExistsError import UserAlreadyExistsError
 from app.models.User import User
 from app.utils.JWT_helper import create_access_token
 from app.utils.hash_helper import check_password_hash, generate_password_hash
-from app.models.Task import Task
-from app.models.TaskLabel import TaskLabel
-from app.models.TaskReport import TaskReport
-
 
 
 def create_user(db: Session, name: str, password: str) -> User:

@@ -3,17 +3,17 @@ import uuid
 import pytest
 
 from app.DatabaseManager import TEST_DB_URL, DatabaseManager
-from app.models import User
-from app.models.Task import Task
-from app.models.TaskLabel import TaskLabel
-from app.models.TaskReport import TaskReport
-from app.controller.label_controller import submit_task
 from app.controller import (
     add_task,
     get_task_feed,
     list_done_tasks,
     report_task,
 )
+from app.controller.label_controller import submit_task
+from app.models import User
+from app.models.Task import Task
+from app.models.TaskLabel import TaskLabel
+from app.models.TaskReport import TaskReport
 
 db_manager = DatabaseManager(TEST_DB_URL)
 

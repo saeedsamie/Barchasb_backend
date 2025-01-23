@@ -2,7 +2,9 @@
 
 ## Overview
 
-**Barchasb Backend** is the backend API for the Barchasb distributed system. It is built with **FastAPI** and provides the core functionality for user management, task distribution, and data labeling through a crowdsourcing model. The backend supports scalable storage and seamless integration with the mobile application.
+**Barchasb Backend** is the backend API for the Barchasb distributed system. It is built with **FastAPI** and provides
+the core functionality for user management, task distribution, and data labeling through a crowdsourcing model. The
+backend supports scalable storage and seamless integration with the mobile application.
 
 ---
 
@@ -11,22 +13,22 @@
 ### Backend Functionality
 
 - **User Management**:
-  - Signup and Login.
-  - User Session Management.
-  - Signout functionality.
-  - View personal performance metrics.
+    - Signup and Login.
+    - User Session Management.
+    - Signout functionality.
+    - View personal performance metrics.
 - **Task Management**:
-  - View available tasks.
-  - Submit labels for tasks.
-  - Report corrupted tasks.
-  - Crowdsourcing-based consensus for labels.
+    - View available tasks.
+    - Submit labels for tasks.
+    - Report corrupted tasks.
+    - Crowdsourcing-based consensus for labels.
 - **Leaderboard**:
-  - Track user rankings based on points earned.
-  - Rewards for accuracy and consistency.
+    - Track user rankings based on points earned.
+    - Rewards for accuracy and consistency.
 - **Notifications**:
-  - Send updates about new datasets and urgent tasks.
+    - Send updates about new datasets and urgent tasks.
 - **Scalable Data Storage**:
-  - Store labeled datasets securely in MinIO or other storage solutions.
+    - Store labeled datasets securely in MinIO or other storage solutions.
 
 ---
 
@@ -37,11 +39,11 @@ The backend is designed to support the distributed labeling system:
 ### Core Components
 
 - **Modular Routers**:
-  - Users: Handles user registration, authentication, and profile management.
-  - Tasks: Manages task distribution, submissions, and reporting.
-  - Leaderboard: Provides rankings and performance metrics.
+    - Users: Handles user registration, authentication, and profile management.
+    - Tasks: Manages task distribution, submissions, and reporting.
+    - Leaderboard: Provides rankings and performance metrics.
 - **Storage**:
-  - Supports integration with MinIO for scalable and secure dataset storage.
+    - Supports integration with MinIO for scalable and secure dataset storage.
 
 ---
 
@@ -74,7 +76,7 @@ The backend is designed to support the distributed labeling system:
    ```
 
 4. Access the API documentation:
-   - Open [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs) in your browser.
+    - Open [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs) in your browser.
 
 ---
 

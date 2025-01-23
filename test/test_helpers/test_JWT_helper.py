@@ -1,7 +1,6 @@
 import pytest
-from fastapi import HTTPException
-
 from app.services.JWT_helper import create_access_token, decode_access_token, create_expired_access_token
+from fastapi import HTTPException
 
 
 def test_create_access_token():

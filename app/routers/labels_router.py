@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
-from app.schemas.taskLabel import LabelCreate
 from app.controller.label_controller import submit_task
+from app.schemas.taskLabel import LabelCreate
 
 router = APIRouter()
 
