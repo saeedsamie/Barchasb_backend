@@ -16,3 +16,4 @@ class User(Base):
     labeled_count = Column(Integer, default=0)
 
     labels = relationship("TaskLabel", back_populates="user")  # List of labels belonging to a user
+    reports = relationship("TaskReport", back_populates="user")  # List of reports created by the user

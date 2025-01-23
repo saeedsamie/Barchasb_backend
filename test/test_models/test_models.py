@@ -1,5 +1,4 @@
 import pytest
-
 from app.DatabaseManager import DatabaseManager, TEST_DB_URL
 from app.models.Task import Task
 from app.models.TaskLabel import TaskLabel
@@ -22,7 +21,7 @@ def test_session():
 
 def test_task_model(test_session):
     """Test creation and relationship of Task model."""
-    task = Task(type="classification", data={"key": "value"}, point=10, tags=["urgent", "important"])
+    task = Task(type="classification", data={"key": "value"}, point=10, tags=["urgent", "important"], is_done=False)
     test_session.add(task)
     test_session.commit()
 
@@ -31,6 +30,7 @@ def test_task_model(test_session):
     assert saved_task.type == "classification"
     assert saved_task.point == 10
     assert "urgent" in saved_task.tags
+    assert saved_task.is_done is False  # Verify the default value of is_done
 
 
 def test_user_model(test_session):
@@ -49,7 +49,7 @@ def test_user_model(test_session):
 def test_task_label_model(test_session):
     """Test creation and relationship of TaskLabel model."""
     user = User(name="labeler", password="labelpass")
-    task = Task(type="annotation", data={"example": "data"}, point=5)
+    task = Task(type="annotation", data={"example": "data"}, point=5, is_done=False)
     test_session.add_all([user, task])
     test_session.commit()
 
@@ -65,24 +65,26 @@ def test_task_label_model(test_session):
 
 def test_task_report_model(test_session):
     """Test creation and relationship of TaskReport model."""
-    task = Task(type="report", data={"report": "data"}, point=2)
-    test_session.add(task)
+    user = User(name="reporter", password="reportpass")
+    task = Task(type="report", data={"report": "data"}, point=2, is_done=False)
+    test_session.add_all([user, task])
     test_session.commit()
 
-    task_report = TaskReport(task_id=task.id, details="This is a test report.")
+    task_report = TaskReport(task_id=task.id, user_id=user.id, details="This is a test report.")
     test_session.add(task_report)
     test_session.commit()
 
     saved_report = test_session.query(TaskReport).filter_by(details="This is a test report.").first()
     assert saved_report is not None
     assert saved_report.task_id == task.id
+    assert saved_report.user_id == user.id
     assert "test report" in saved_report.details
 
 
 def test_task_with_labels_and_reports_relationship(test_session):
     """Test relationships between Task, TaskLabel, and TaskReport."""
     # Create a task
-    task = Task(type="complex", data={"task": "data"}, point=15, tags=["tag1", "tag2"])
+    task = Task(type="complex", data={"task": "data"}, point=15, tags=["tag1", "tag2"], is_done=True)
     test_session.add(task)
     test_session.commit()
 
@@ -93,7 +95,7 @@ def test_task_with_labels_and_reports_relationship(test_session):
 
     label1 = TaskLabel(user_id=user.id, task_id=task.id, content="Label 1")
     label2 = TaskLabel(user_id=user.id, task_id=task.id, content="Label 2")
-    report1 = TaskReport(task_id=task.id, details="Report 1")
+    report1 = TaskReport(task_id=task.id, user_id=user.id, details="Report 1")
     test_session.add_all([label1, label2, report1])
     test_session.commit()
 
@@ -103,24 +105,26 @@ def test_task_with_labels_and_reports_relationship(test_session):
     assert len(saved_task.reports) == 1
     assert saved_task.labels[0].content == "Label 1"
     assert saved_task.reports[0].details == "Report 1"
+    assert saved_task.is_done is True  # Verify is_done status
 
 
-def test_user_with_labels_relationship(test_session):
-    """Test relationship between User and TaskLabel."""
+def test_user_with_labels_and_reports_relationship(test_session):
+    """Test relationships between User, TaskLabel, and TaskReport."""
     # Create a user and task
     user = User(name="user2", password="securepass")
-    task = Task(type="basic", data={"task": "info"}, point=5)
+    task = Task(type="basic", data={"task": "info"}, point=5, is_done=False)
     test_session.add_all([user, task])
     test_session.commit()
 
-    # Create labels for the user and task
+    # Create labels and reports for the user and task
     label1 = TaskLabel(user_id=user.id, task_id=task.id, content="User2 Label 1")
-    label2 = TaskLabel(user_id=user.id, task_id=task.id, content="User2 Label 2")
-    test_session.add_all([label1, label2])
+    report1 = TaskReport(user_id=user.id, task_id=task.id, details="User2 Report 1")
+    test_session.add_all([label1, report1])
     test_session.commit()
 
-    # Fetch user with labels
+    # Fetch user with labels and reports
     saved_user = test_session.query(User).filter_by(id=user.id).first()
-    assert len(saved_user.labels) == 2
+    assert len(saved_user.labels) == 1
+    assert len(saved_user.reports) == 1
     assert saved_user.labels[0].content == "User2 Label 1"
-    assert saved_user.labels[1].content == "User2 Label 2"
+    assert saved_user.reports[0].details == "User2 Report 1"

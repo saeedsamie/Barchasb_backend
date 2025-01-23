@@ -1,6 +1,6 @@
 import uuid
 
-from sqlalchemy import Column, Integer, String, UUID, ARRAY
+from sqlalchemy import Column, Integer, String, UUID, ARRAY, Boolean
 from sqlalchemy.dialects.postgresql import JSON
 from sqlalchemy.orm import relationship
 
@@ -15,6 +15,7 @@ class Task(Base):
     data = Column(JSON, nullable=False)
     point = Column(Integer, nullable=False)
     tags = Column(ARRAY(String))
+    is_done = Column(Boolean, default=False)
 
     labels = relationship("TaskLabel", back_populates="task")  # List of labels belonging to a task
     reports = relationship("TaskReport", back_populates="task", cascade="all, delete-orphan")

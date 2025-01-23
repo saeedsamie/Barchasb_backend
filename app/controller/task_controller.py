@@ -1,13 +1,17 @@
+import uuid
+
 from sqlalchemy.orm import Session
 
 from app.models.Task import Task
-from app.models.TaskLabel import TaskLabel
-from app.models.TaskReport import TaskReport
 
 
-def get_task_feed(db: Session, limit):
-    tasks = db.query(Task).all()[:limit]
-    return tasks
+def list_done_tasks(db: Session):
+    """List all tasks marked as done."""
+    return db.query(Task).filter(Task.is_done == True).all()
+
+
+def get_task_feed(db: Session):
+    return db.query(Task).filter(Task.is_done == False).all()
 
 
 def add_task(db: Session, type: str, data: dict, point: int, tags: list = None):
@@ -18,27 +22,15 @@ def add_task(db: Session, type: str, data: dict, point: int, tags: list = None):
     return task
 
 
-def list_done_tasks(db: Session):
-    tasks = db.query(Task).filter(Task.labels.any(TaskLabel.content != None)).all()
-    return tasks
-
-
-def report_task(db: Session, report: TaskReport):
-    """
-    Report an issue with a task.
-
-    Args:
-        db (Session): Database session.
-        report (TaskReport): TaskReport object containing the task ID and the report details.
-
-    Returns:
-        TaskReport: The created report object.
-    """
-    task_report = TaskReport(task_id=report.task_id, details=report.details)
-    db.add(task_report)
+def mark_task_done(db: Session, task_id: uuid.UUID):
+    """Mark a task as done."""
+    task = db.query(Task).filter(Task.id == task_id).first()
+    if not task:
+        raise ValueError(f"Task with ID {task_id} not found.")
+    task.is_done = True
     db.commit()
-    db.refresh(task_report)
-    return task_report
+    db.refresh(task)
+    return task
 
 # def update_task_status(db: Session, task_id: str, new_status: str):
 #     """
