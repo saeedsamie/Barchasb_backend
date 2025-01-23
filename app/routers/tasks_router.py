@@ -3,17 +3,17 @@ from typing import List
 from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.orm import Session
 
-from app.DatabaseManager import DatabaseManager, DATABASE_URL
+from app.DatabaseManager import DatabaseManager, PROD_DB_URL
 from app.schemas.task import TaskCreate, TaskResponse
 from app.schemas.taskReport import TaskReportCreate
-from app.services.task_service import (
+from app.controller import (
     add_task,
     get_task_feed,
     report_task,
 )
 
 # Initialize the database manager
-db_manager = DatabaseManager(DATABASE_URL)
+db_manager = DatabaseManager(PROD_DB_URL)
 
 router = APIRouter(prefix="/tasks", tags=["tasks"])
 

@@ -5,12 +5,12 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import Session, sessionmaker
 
-from app.config import settings
-from app.models.TaskLabel import TaskLabel
+from app.DatabaseManager import TEST_DB_URL
 from app.models.Task import Task
+from app.models.TaskLabel import TaskLabel
 from app.models.User import User
 
-engine = create_engine(settings.TEST_DATABASE_URL)
+engine = create_engine(TEST_DB_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 

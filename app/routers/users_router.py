@@ -3,18 +3,18 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, Body
 from sqlalchemy.orm import Session
 
-from app.DatabaseManager import DatabaseManager, TEST_DATABASE_URL
-from app.schemas.user import UserCreate, UserUpdate, UserLogin, UserChangePassword
-from app.services.user_service import (
+from app.DatabaseManager import DatabaseManager, TEST_DB_URL
+from app.controller.user_controller import (
     create_user,
     login_user,
     get_information,
     change_information,
     change_password,
 )
+from app.schemas.user import UserCreate, UserUpdate, UserLogin, UserChangePassword
 
 # Initialize the database manager
-db_manager = DatabaseManager(TEST_DATABASE_URL)
+db_manager = DatabaseManager(TEST_DB_URL)
 
 router = APIRouter(prefix="/users")
 

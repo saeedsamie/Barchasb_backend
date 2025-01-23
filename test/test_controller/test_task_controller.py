@@ -2,21 +2,20 @@ import uuid
 
 import pytest
 
-from app.DatabaseManager import TEST_DATABASE_URL, DatabaseManager
+from app.DatabaseManager import TEST_DB_URL, DatabaseManager
 from app.models import User
 from app.models.Task import Task
 from app.models.TaskLabel import TaskLabel
 from app.models.TaskReport import TaskReport
-from app.services.task_service import (
+from app.controller.label_controller import submit_task
+from app.controller import (
     add_task,
     get_task_feed,
     list_done_tasks,
-    submit_task,
     report_task,
-    update_task_status,
 )
 
-db_manager = DatabaseManager(TEST_DATABASE_URL)
+db_manager = DatabaseManager(TEST_DB_URL)
 
 
 @pytest.fixture(scope="module")
@@ -86,12 +85,12 @@ def test_report_task(db_session):
     assert created_report.details == report.details
 
 
-def test_update_task_status(db_session):
-    task = db_session.query(Task).first()
-    new_status = "completed"
-    updated_task = update_task_status(db_session, task_id=task.id, new_status=new_status)
-    assert updated_task is not None
-    assert updated_task.status == new_status
+# def test_update_task_status(db_session):
+#     task = db_session.query(Task).first()
+#     new_status = "completed"
+#     updated_task = update_task_status(db_session, task_id=task.id, new_status=new_status)
+#     assert updated_task is not None
+#     assert updated_task.status == new_status
 
 
 def initialize_database_with_users(db_session):

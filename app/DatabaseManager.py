@@ -6,8 +6,9 @@ from sqlalchemy.orm import sessionmaker, Session
 
 Base = declarative_base()
 
-DATABASE_URL: str = "postgresql://admin:admin@barchasb.bz91.ir:5432/barchasb_db"
-TEST_DATABASE_URL: str = "postgresql://admin:admin@barchasb.bz91.ir:5432/test_barchasb_db"
+PROD_DB_URL: str = "postgresql://admin:admin@barchasb.bz91.ir:5432/barchasb_db"
+DEV_DB_URL: str = "postgresql://admin:admin@barchasb.bz91.ir:5432/dev_barchasb_db"
+TEST_DB_URL: str = "postgresql://admin:admin@barchasb.bz91.ir:5432/test_barchasb_db"
 
 
 class DatabaseManager:
@@ -32,6 +33,8 @@ class DatabaseManager:
         """
         Create all tables.
         """
+        if self.database_url == TEST_DB_URL:
+            self.drop_db()
         print("Database initialized")
         Base.metadata.create_all(bind=self.engine)
         print("Registered tables:", Base.metadata.tables.keys())

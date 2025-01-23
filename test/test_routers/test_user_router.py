@@ -1,14 +1,14 @@
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
-from app.DatabaseManager import TEST_DATABASE_URL, DatabaseManager
+from app.DatabaseManager import TEST_DB_URL, DatabaseManager
 from app.routers.users_router import router
 
 app = FastAPI()
 app.include_router(router)
 client = TestClient(app)
 
-db_manager = DatabaseManager(TEST_DATABASE_URL)
+db_manager = DatabaseManager(TEST_DB_URL)
 db_manager.drop_db()
 db_manager.init_db()
 

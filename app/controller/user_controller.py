@@ -3,23 +3,14 @@ import uuid
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
+from app.exceptions.UserAlreadyExistsError import UserAlreadyExistsError
 from app.models.User import User
-from app.services.JWT_helper import create_access_token
-from app.services.hash_helper import check_password_hash, generate_password_hash
+from app.utils.JWT_helper import create_access_token
+from app.utils.hash_helper import check_password_hash, generate_password_hash
+from app.models.Task import Task
+from app.models.TaskLabel import TaskLabel
+from app.models.TaskReport import TaskReport
 
-
-class UserAlreadyExistsError(Exception):
-    """
-    Custom exception raised when a user with the same username already exists.
-    """
-
-    def __init__(self, username: str):
-        self.username = username
-        self.message = f"User with name '{username}' already exists."
-        super().__init__(self.message)
-
-    def __str__(self):
-        return self.message
 
 
 def create_user(db: Session, name: str, password: str) -> User:
