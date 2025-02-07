@@ -54,7 +54,7 @@ def get_leader_board(db: Session = Depends(db_manager.get_db)):
         raise HTTPException(status_code=400, detail=f"Failed to fetch leaderboard: {str(e)}")
 
 
-@router.get("/{user_id}", response_model=dict)
+@router.get("/user/{user_id}", response_model=dict)
 def get_user_information(user_id: str, db: Session = Depends(db_manager.get_db)):
     try:
         user_uuid = UUID(user_id)  # Validate UUID format
@@ -67,7 +67,7 @@ def get_user_information(user_id: str, db: Session = Depends(db_manager.get_db))
     return {'id': user.id, 'name': user.name, 'points': user.points, 'label_count': user.labeled_count}
 
 
-@router.put("/{user_id}", response_model=dict)
+@router.put("/user/{user_id}", response_model=dict)
 def update_user_information(user_id: str, user_update: UserUpdate, db: Session = Depends(db_manager.get_db)):
     try:
         user_uuid = UUID(user_id)  # Validate UUID format
@@ -80,7 +80,7 @@ def update_user_information(user_id: str, user_update: UserUpdate, db: Session =
     return {'id': user.id, 'name': user.name, 'points': user.points, 'label_count': user.labeled_count}
 
 
-@router.put("/{user_id}/password", response_model=dict)
+@router.put("/user/{user_id}/password", response_model=dict)
 def update_user_password(user_id: str, user_password: UserChangePassword, db: Session = Depends(db_manager.get_db)):
     try:
         user_uuid = UUID(user_id)  # Validate UUID format

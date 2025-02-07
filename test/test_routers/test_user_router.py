@@ -57,13 +57,13 @@ def test_get_user_information_success(db_session):
         "password": "SecureP@ssw0rd!"
     })
     user_id = user_response.json()["id"]
-    response = client.get(f"/users/{user_id}")
+    response = client.get(f"/users/user/{user_id}")
     assert response.status_code == 200
     assert response.json()["name"] == "info_test_user"
 
 
 def test_get_user_information_not_found(db_session):
-    response = client.get("/users/00000000-0000-0000-0000-000000000000")
+    response = client.get("/users/user/00000000-0000-0000-0000-000000000000")
     assert response.status_code == 404
     assert response.json()["detail"] == "User not found"
 
@@ -74,7 +74,7 @@ def test_update_user_information_success(db_session):
         "password": "SecureP@ssw0rd!"
     })
     user_id = user_response.json()["id"]
-    response = client.put(f"/users/{user_id}", json={"new_name": "updated_name"})
+    response = client.put(f"/users/user/{user_id}", json={"new_name": "updated_name"})
     assert response.status_code == 200
 
 
@@ -84,12 +84,12 @@ def test_update_user_password_success(db_session):
         "password": "SecureP@ssw0rd!"
     })
     user_id = user_response.json()["id"]
-    response = client.put(f"/users/{user_id}/password", json={"new_password": "NewP@ssw0rd!"})
+    response = client.put(f"/users/user/{user_id}/password", json={"new_password": "NewP@ssw0rd!"})
     assert response.status_code == 200
 
 
 def test_update_user_password_not_found(db_session):
-    response = client.put("/users/00000000-0000-0000-0000-000000000000/password", json={
+    response = client.put("/users/user/00000000-0000-0000-0000-000000000000/password", json={
         "new_password": "NewP@ssw0rd!"
     })
     assert response.status_code == 404
