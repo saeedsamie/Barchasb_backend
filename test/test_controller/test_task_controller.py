@@ -42,6 +42,8 @@ def test_add_task(test_session):
 
 
 def test_get_task_feed(test_session):
+    db_manager.drop_db()
+    db_manager.init_db()
     """Test retrieving tasks that are not marked as done."""
     # Add tasks to the database
     task1 = add_task(
@@ -67,6 +69,8 @@ def test_get_task_feed(test_session):
 
 
 def test_list_done_tasks(test_session):
+    db_manager.drop_db()
+    db_manager.init_db()
     """Test retrieving tasks that are marked as done."""
     task1 = add_task(
         db=test_session,

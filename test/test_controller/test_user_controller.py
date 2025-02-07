@@ -16,7 +16,7 @@ from app.utils.hash_helper import check_password_hash
 db_manager = DatabaseManager()
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="function")
 def db_session():
     """Set up the database using DatabaseManager and yield a session."""
     db_manager.init_db()  # Initialize the database and create tables

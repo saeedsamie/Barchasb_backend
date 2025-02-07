@@ -1,12 +1,13 @@
 import pytest
-from app.DatabaseManager import DatabaseManager, TEST_DB_URL
+
+from app.DatabaseManager import DatabaseManager
 from app.models.Task import Task
 from app.models.TaskLabel import TaskLabel
 from app.models.TaskReport import TaskReport
 from app.models.User import User
 
 # Initialize the DatabaseManager with the test database URL
-db_manager = DatabaseManager(TEST_DB_URL)
+db_manager = DatabaseManager()
 
 
 @pytest.fixture(scope="module")

@@ -1,4 +1,4 @@
-from app.services.hash_helper import generate_password_hash, check_password_hash
+from app.utils.hash_helper import generate_password_hash, check_password_hash
 
 
 def test_generate_password_hash():

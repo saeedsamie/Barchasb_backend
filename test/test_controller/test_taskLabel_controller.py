@@ -1,17 +1,18 @@
-import pytest
 import uuid
-from app.DatabaseManager import DatabaseManager, TEST_DB_URL
-from app.models.Task import Task
-from app.models.User import User
-from app.models.TaskLabel import TaskLabel
+
+import pytest
+
+from app.DatabaseManager import DatabaseManager
 from app.controller.taskLabel_controller import (
     list_labeled_tasks_by_user,
     submit_label,
     calculate_consensus,
 )
+from app.models.Task import Task
+from app.models.User import User
 
 # Initialize the DatabaseManager with the test database URL
-db_manager = DatabaseManager(TEST_DB_URL)
+db_manager = DatabaseManager()
 
 
 @pytest.fixture(scope="module")
