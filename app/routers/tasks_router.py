@@ -4,13 +4,10 @@ from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.orm import Session
 
 from app.DatabaseManager import DatabaseManager, PROD_DB_URL
-from app.controller import (
-    add_task,
-    get_task_feed,
-    report_task,
-)
+from app.controller.taskReport_controller import report_task
+from app.controller.task_controller import add_task, get_task_feed
 from app.schemas.task import TaskCreate, TaskResponse
-from app.schemas.taskReport import TaskReportCreate
+from app.schemas.taskReport import TaskReport
 
 # Initialize the database manager
 db_manager = DatabaseManager(PROD_DB_URL)
@@ -32,18 +29,15 @@ def create_task(task: TaskCreate, db: Session = Depends(db_manager.get_db)):
 @router.get("/feed", response_model=List[TaskCreate])
 def fetch_task_feed(limit: int, db: Session = Depends(db_manager.get_db)):
     try:
-        tasks = get_task_feed(db, limit=limit)
-        return [
-            TaskCreate(
-                status="success",
-                task_id=task.id,
-                type=task.type,
-                data=task.data,
-                point=task.point,
-                tags=task.tags,
-            )
-            for task in tasks
-        ]
+        tasks = get_task_feed(db)
+        return [TaskCreate(
+            status="success",
+            task_id=task.id,
+            type=task.type,
+            data=task.data,
+            point=task.point,
+            tags=task.tags,
+        ) for task in tasks][-limit:]
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
@@ -61,10 +55,11 @@ def fetch_task_feed(limit: int, db: Session = Depends(db_manager.get_db)):
 
 
 @router.post("/report", response_model=dict)
-def report_existing_task(report: TaskReportCreate, db: Session = Depends(db_manager.get_db)):
+def report_existing_task(task_report: TaskReport, db: Session = Depends(db_manager.get_db)):
     try:
         # Validate the report and save
-        report_result = report_task(db, report=report)
+        report_result = report_task(db, task_id=task_report.task_id, user_id=task_report.user_id,
+                                    details=task_report.detail)
         return {"status": "success", "message": f"Task report successfully created {report_result.id}"}
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Report failed: {str(e)}")
