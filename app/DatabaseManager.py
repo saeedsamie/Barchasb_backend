@@ -1,28 +1,25 @@
+import os
 from typing import Generator
 
+from dotenv import load_dotenv
 from sqlalchemy import create_engine
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker, Session
+from sqlalchemy.orm import sessionmaker, Session, declarative_base
 
 Base = declarative_base()
-
-PROD_DB_URL: str = "postgresql://admin:admin@barchasb.bz91.ir:5432/barchasb_db"
-DEV_DB_URL: str = "postgresql://admin:admin@barchasb.bz91.ir:5432/dev_barchasb_db"
-TEST_DB_URL: str = "postgresql://admin:admin@barchasb.bz91.ir:5432/test_barchasb_db"
+load_dotenv()
 
 
 class DatabaseManager:
-    def __init__(self, database_url: str):
-        self.database_url = database_url
+    def __init__(self):
+        self.database_url = os.getenv("DATABASE_URL")
         self.engine = create_engine(self.database_url)
         self.SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=self.engine)
-        print("Database defined")
+        print("Database Manager initialized")
 
     def get_db(self) -> Generator[Session, None, None]:
         """
         Dependency for providing a database session in FastAPI routes.
         """
-        print("Database generated")
         db = self.SessionLocal()
         try:
             yield db
@@ -33,8 +30,6 @@ class DatabaseManager:
         """
         Create all tables.
         """
-        if self.database_url == TEST_DB_URL:
-            self.drop_db()
         print("Database initialized")
         Base.metadata.create_all(bind=self.engine)
         print("Registered tables:", Base.metadata.tables.keys())

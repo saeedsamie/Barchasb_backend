@@ -3,27 +3,29 @@ from typing import List
 from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.orm import Session
 
-from app.DatabaseManager import DatabaseManager, PROD_DB_URL
+from app.DatabaseManager import DatabaseManager
+from app.controller.taskLabel_controller import submit_label
 from app.controller.taskReport_controller import report_task
 from app.controller.task_controller import add_task, get_task_feed
 from app.schemas.task import TaskCreate, TaskResponse
+from app.schemas.taskLabel import LabelCreate
 from app.schemas.taskReport import TaskReport
 
 # Initialize the database manager
-db_manager = DatabaseManager(PROD_DB_URL)
+db_manager = DatabaseManager()
 
 router = APIRouter(prefix="/tasks", tags=["tasks"])
 
 
 @router.post("/new", response_model=TaskResponse)
 def create_task(task: TaskCreate, db: Session = Depends(db_manager.get_db)):
-    try:
-        created_task = add_task(
-            db, type=task.type, data=task.data, point=task.point, tags=task.tags
-        )
-        return TaskResponse(status="success", task_id=created_task.id)
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+    # try:
+    created_task = add_task(
+        db, type=task.type, data=task.data, point=task.point, tags=task.tags, is_done=task.is_done
+    )
+    return TaskResponse(status="success", task_id=created_task.id)
+    # except Exception as e:
+    #     raise HTTPException(status_code=400, detail=str(e))
 
 
 @router.get("/feed", response_model=List[TaskCreate])
@@ -42,16 +44,15 @@ def fetch_task_feed(limit: int, db: Session = Depends(db_manager.get_db)):
         raise HTTPException(status_code=400, detail=str(e))
 
 
-# @router.put("/update/{task_id}/status", response_model=TaskResponse)
-# def modify_task_status(task_id: str, new_status: str, db: Session = Depends(db_manager.get_db)):
-#     try:
-#         updated_task = update_task_status(db, task_id=task_id, new_status=new_status)
-#         return TaskResponse(
-#             status="success",
-#             task_id=updated_task.id
-#         )
-#     except Exception as e:
-#         raise HTTPException(status_code=400, detail=str(e))
+@router.post("/submit", response_model=dict)
+def submit_existing_task(label: LabelCreate, db: Session = Depends(db_manager.get_db)):
+    try:
+        # Ensure user_id and task_id exist before committing
+        submission_result = submit_label(db, task_id=label.task_id, user_id=label.user_id,
+                                         content=str(label.content))
+        return {"status": "success", "message": f"Task successfully submitted {submission_result.id}"}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Submission failed: {str(e)}")
 
 
 @router.post("/report", response_model=dict)
@@ -63,3 +64,14 @@ def report_existing_task(task_report: TaskReport, db: Session = Depends(db_manag
         return {"status": "success", "message": f"Task report successfully created {report_result.id}"}
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Report failed: {str(e)}")
+
+# @router.put("/update/{task_id}/status", response_model=TaskResponse)
+# def modify_task_status(task_id: str, new_status: str, db: Session = Depends(db_manager.get_db)):
+#     try:
+#         updated_task = update_task_status(db, task_id=task_id, new_status=new_status)
+#         return TaskResponse(
+#             status="success",
+#             task_id=updated_task.id
+#         )
+#     except Exception as e:
+#         raise HTTPException(status_code=400, detail=str(e))

@@ -20,7 +20,7 @@ def test_session():
     session = db_manager.SessionLocal()
     yield session
     session.close()
-    db_manager.drop_db()  # Cleanup the database after tests
+    # db_manager.drop_db()  # Cleanup the database after tests
 
 
 def test_add_task(test_session):
@@ -31,11 +31,13 @@ def test_add_task(test_session):
         data={"key": "value"},
         point=10,
         tags=["urgent", "important"],
+        is_done=False
     )
     assert task is not None
     assert task.type == "classification"
     assert task.data == {"key": "value"}
     assert task.point == 10
+    assert task.is_done == False
     assert "urgent" in task.tags
 
 

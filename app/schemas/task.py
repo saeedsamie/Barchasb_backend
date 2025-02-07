@@ -11,6 +11,7 @@ class TaskBase(BaseModel):
     title: str
     description: str
     point: int = 10
+    is_done: bool = False
     tags: Optional[List[str]] = []
 
     class Config:
@@ -23,6 +24,7 @@ class TaskCreate(BaseModel):
     title: str = ""
     description: str = ""
     point: int
+    is_done: bool = False
     tags: Optional[List[str]] = []
 
 

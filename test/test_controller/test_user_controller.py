@@ -23,7 +23,7 @@ def db_session():
     session = db_manager.SessionLocal()
     yield session
     session.close()
-    db_manager.drop_db()  # Cleanup the database after tests
+    # db_manager.drop_db()  # Cleanup the database after tests
 
 
 def test_user_create(db_session):

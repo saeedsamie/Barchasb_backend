@@ -14,8 +14,8 @@ def get_task_feed(db: Session):
     return db.query(Task).filter(Task.is_done == False).all()
 
 
-def add_task(db: Session, type: str, data: dict, point: int, tags: list = None):
-    task = Task(type=type, data=data, point=point, tags=tags or [])
+def add_task(db: Session, type: str, data: dict, point: int, is_done: bool = False, tags: list = None):
+    task = Task(type=type, data=data, point=point, is_done=is_done, tags=tags or [])
     db.add(task)
     db.commit()
     db.refresh(task)

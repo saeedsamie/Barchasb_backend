@@ -10,6 +10,8 @@ services:
     volumes:
       - .:/app
     restart: unless-stopped
+    environment:
+      - DATABASE_URL=postgresql://admin:admin@192.168.1.11:5432/barchasb_db
   postgres:
     image: postgres:15  # PostgreSQL version
     container_name: postgres_server
