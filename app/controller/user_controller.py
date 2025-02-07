@@ -9,7 +9,7 @@ from app.utils.JWT_helper import create_access_token
 from app.utils.hash_helper import check_password_hash, generate_password_hash
 
 
-def create_user(db: Session, name: str, password: str) -> User:
+def create_user(db: Session, name: str, password: str, points: int = 0) -> User:
     """
     Create a new user in the database.
 
@@ -17,7 +17,7 @@ def create_user(db: Session, name: str, password: str) -> User:
         UserAlreadyExistsError: If a user with the same username already exists.
     """
     hashed_password = generate_password_hash(password)
-    user = User(name=name, password=hashed_password)
+    user = User(name=name, password=hashed_password, points=points)
     try:
         db.add(user)
         db.commit()
@@ -58,6 +58,10 @@ def change_information(db: Session, user_id: uuid.UUID, new_name: str = None) ->
         user.name = new_name
         db.commit()
     return user  # Return the updated user or None if not found
+
+
+def get_leaderboard(db: Session):
+    return db.query(User).order_by(User.points.desc()).all()
 
 
 def change_password(db: Session, user_id: uuid.UUID, new_password: str) -> User:

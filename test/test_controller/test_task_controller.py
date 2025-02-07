@@ -1,6 +1,6 @@
 import pytest
 
-from app.DatabaseManager import DatabaseManager, TEST_DB_URL
+from app.DatabaseManager import DatabaseManager
 from app.controller.task_controller import (
     list_done_tasks,
     get_task_feed,
@@ -10,7 +10,7 @@ from app.controller.task_controller import (
 from app.models.Task import Task
 
 # Initialize the DatabaseManager with the test database URL
-db_manager = DatabaseManager(TEST_DB_URL)
+db_manager = DatabaseManager()
 
 
 @pytest.fixture(scope="function")

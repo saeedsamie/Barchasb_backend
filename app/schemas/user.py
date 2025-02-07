@@ -12,6 +12,7 @@ class User(BaseModel):
 class UserCreate(BaseModel):
     name: str = Field(..., min_length=3, max_length=30)
     password: str = Field(..., min_length=8, max_length=128, description="Password must be strong")
+    points: int = 0
 
     @field_validator("password")
     def validate_password_strength(cls, password):

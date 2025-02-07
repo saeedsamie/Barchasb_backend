@@ -9,8 +9,7 @@ from app.controller.user_controller import (
     login_user,
     get_information,
     change_information,
-    change_password,
-)
+    change_password, get_leaderboard)
 from app.schemas.user import UserCreate, UserUpdate, UserLogin, UserChangePassword
 
 # Initialize the database manager
@@ -22,7 +21,7 @@ router = APIRouter(prefix="/users")
 @router.post("/signup", response_model=dict)
 def create_user_route(user: UserCreate, db: Session = Depends(db_manager.get_db)):
     try:
-        created_user = create_user(db, name=user.name, password=user.password)
+        created_user = create_user(db, name=user.name, password=user.password, points=user.points)
         return {"id": str(created_user.id), "name": created_user.name}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
@@ -35,6 +34,24 @@ def login_user_route(user: UserLogin = Body(...), db: Session = Depends(db_manag
         return {"access_token": token}
     except Exception as e:
         raise HTTPException(status_code=401, detail=str(e))
+
+
+@router.get("/leaderboard", response_model=list)
+def get_leader_board(db: Session = Depends(db_manager.get_db)):
+    """
+    Retrieve a list of users sorted by points in descending order.
+    """
+
+    try:
+        users = get_leaderboard(db)
+        return [
+            {"id": user.id,
+             "name": user.name,
+             "points": user.points,
+             "labeled_count": user.labeled_count} for user in users
+        ]
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Failed to fetch leaderboard: {str(e)}")
 
 
 @router.get("/{user_id}", response_model=dict)

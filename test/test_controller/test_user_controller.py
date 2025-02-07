@@ -1,19 +1,19 @@
 import pytest
 
-from app.DatabaseManager import DatabaseManager, TEST_DB_URL
+from app.DatabaseManager import DatabaseManager
 from app.controller.user_controller import (
     create_user,
     login_user,
     get_information,
     change_information,
     change_password,
-    UserAlreadyExistsError
+    UserAlreadyExistsError, get_leaderboard
 )
 from app.models.User import User
 from app.utils.hash_helper import check_password_hash
 
 # Initialize the DatabaseManager with the test database URL
-db_manager = DatabaseManager(TEST_DB_URL)
+db_manager = DatabaseManager()
 
 
 @pytest.fixture(scope="module")
@@ -23,7 +23,7 @@ def db_session():
     session = db_manager.SessionLocal()
     yield session
     session.close()
-    # db_manager.drop_db()  # Cleanup the database after tests
+    db_manager.drop_db()  # Cleanup the database after tests
 
 
 def test_user_create(db_session):
@@ -80,3 +80,13 @@ def test_create_user_already_exists(db_session):
 
     users = db_session.query(User).filter_by(name="duplicatedtestuser").all()
     assert len(users) == 1
+
+
+def test_leader_board(db_session):
+    create_user(db_session, name="Alice", password="SecureP@ssw0rd!", points=1)
+    create_user(db_session, name="Bob", password="SecureP@ssw0rd!", points=200)
+    create_user(db_session, name="Charlie", password="SecureP@ssw0rd!", points=3000000)
+
+    leader_board = get_leaderboard(db_session)
+    ordered_names = [user.name for user in leader_board]
+    assert ordered_names == ["Charlie", "Bob", "Alice"]

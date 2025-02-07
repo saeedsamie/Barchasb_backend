@@ -1,3 +1,4 @@
+import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
@@ -11,10 +12,20 @@ app.include_router(u_router)
 client = TestClient(app)
 
 db_manager = DatabaseManager()
-db_manager.init_db()
 
 
-def test_create_task():
+@pytest.fixture(scope="module")
+def db_session():
+    """Set up the database using DatabaseManager and yield a session."""
+    db_manager.init_db()  # Initialize the database and create tables
+    session = db_manager.SessionLocal()
+    yield session
+    session.close()
+
+    db_manager.drop_db()  # Cleanup the database after tests
+
+
+def test_create_task(db_session):
     payload = {
         "type": "image",
         "data": {"url": "/path/to/file1"},
@@ -30,13 +41,13 @@ def test_create_task():
     assert response_data["status"] == "success"
 
 
-def test_get_tasks():
+def test_get_tasks(db_session):
     response = client.get("/tasks/feed", params={"limit": 10})
     assert response.status_code == 200
     assert isinstance(response.json(), list)
 
 
-def test_get_task_feed():
+def test_get_task_feed(db_session):
     response = client.get("/tasks/feed", params={"limit": 2})
     assert response.status_code == 200
     tasks = response.json()
@@ -44,7 +55,7 @@ def test_get_task_feed():
     assert len(tasks) <= 2
 
 
-def test_submit_task():
+def test_submit_task(db_session):
     # Pre-create a task to retrieve its ID
     response = client.post("/users/signup", json={
         "name": "submit_task_user",
@@ -70,7 +81,7 @@ def test_submit_task():
     assert submission_data["status"] == "success"
 
 
-def test_report_task():
+def test_report_task(db_session):
     response = client.post("/users/signup", json={"name": "report_user", "password": "SecureP@ssw0rd!"})
     user_id = response.json()["id"]
     # Pre-create a task to retrieve its ID
