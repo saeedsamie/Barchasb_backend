@@ -1,6 +1,7 @@
-from uuid import UUID
+import uuid
 
 from fastapi import APIRouter, Depends, HTTPException, Body
+from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 
 from app.DatabaseManager import DatabaseManager
@@ -11,11 +12,21 @@ from app.controller.user_controller import (
     change_information,
     change_password, get_leaderboard)
 from app.schemas.user import UserCreate, UserUpdate, UserLogin, UserChangePassword
+from app.utils.JWT_helper import decode_access_token
 
 # Initialize the database manager
 db_manager = DatabaseManager()
 
 router = APIRouter(prefix="/users")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
+
+
+def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(db_manager.get_db)):
+    payload = decode_access_token(token)
+    user = get_information(db, user_id=uuid.UUID(payload["user_id"]))
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    return user
 
 
 @router.post("/signup", response_model=dict)
@@ -37,11 +48,11 @@ def login_user_route(user: UserLogin = Body(...), db: Session = Depends(db_manag
 
 
 @router.get("/leaderboard", response_model=list)
-def get_leader_board(db: Session = Depends(db_manager.get_db)):
+def get_leader_board(current_user: dict = Depends(get_current_user),
+                     db: Session = Depends(db_manager.get_db)):
     """
     Retrieve a list of users sorted by points in descending order.
     """
-
     try:
         users = get_leaderboard(db)
         return [
@@ -54,40 +65,27 @@ def get_leader_board(db: Session = Depends(db_manager.get_db)):
         raise HTTPException(status_code=400, detail=f"Failed to fetch leaderboard: {str(e)}")
 
 
-@router.get("/user/{user_id}", response_model=dict)
-def get_user_information(user_id: str, db: Session = Depends(db_manager.get_db)):
-    try:
-        user_uuid = UUID(user_id)  # Validate UUID format
-    except ValueError:
-        raise HTTPException(status_code=400, detail="Invalid user ID format")
-
-    user = get_information(db, user_id=user_uuid)
+@router.get("/user/", response_model=dict)
+def get_user_information(current_user=Depends(get_current_user), db: Session = Depends(db_manager.get_db)):
+    user = current_user
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     return {'id': user.id, 'name': user.name, 'points': user.points, 'label_count': user.labeled_count}
 
 
-@router.put("/user/{user_id}", response_model=dict)
-def update_user_information(user_id: str, user_update: UserUpdate, db: Session = Depends(db_manager.get_db)):
-    try:
-        user_uuid = UUID(user_id)  # Validate UUID format
-    except ValueError:
-        raise HTTPException(status_code=400, detail="Invalid user ID format")
-
-    user = change_information(db, user_id=user_uuid, new_name=user_update.new_name)
+@router.put("/user/", response_model=dict)
+def update_user_information(user_update: UserUpdate, current_user=Depends(get_current_user),
+                            db: Session = Depends(db_manager.get_db)):
+    user = change_information(db, user_id=current_user.id, new_name=user_update.new_name)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     return {'id': user.id, 'name': user.name, 'points': user.points, 'label_count': user.labeled_count}
 
 
 @router.put("/user/{user_id}/password", response_model=dict)
-def update_user_password(user_id: str, user_password: UserChangePassword, db: Session = Depends(db_manager.get_db)):
-    try:
-        user_uuid = UUID(user_id)  # Validate UUID format
-    except ValueError:
-        raise HTTPException(status_code=400, detail="Invalid user ID format")
-
-    user = change_password(db, user_id=user_uuid, new_password=user_password.new_password)
+def update_user_password(user_password: UserChangePassword, current_user=Depends(get_current_user),
+                         db: Session = Depends(db_manager.get_db)):
+    user = change_password(db, user_id=current_user.id, new_password=user_password.new_password)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     return {'id': user.id, 'result': "Password updated"}
