@@ -13,10 +13,7 @@
           "request": {
             "method": "POST",
             "header": [],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"testuser\",\n  \"password\": \"password123\",\n  \"points\": 100\n}"
-            },
+            "body": {"mode": "raw", "raw": "{\"name\": \"testuser\", \"password\": \"password123\", \"points\": 100}"},
             "url": {
               "raw": "{{base_url}}/users/signup",
               "host": ["{{base_url}}"],
@@ -29,14 +26,61 @@
           "request": {
             "method": "POST",
             "header": [],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"testuser\",\n  \"password\": \"password123\"\n}"
-            },
+            "body": {"mode": "raw", "raw": "{\"name\": \"testuser\", \"password\": \"password123\"}"},
             "url": {
               "raw": "{{base_url}}/users/login",
               "host": ["{{base_url}}"],
               "path": ["users", "login"]
+            }
+          }
+        },
+        {
+          "name": "Get User Information",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{access_token}}"}],
+            "url": {
+              "raw": "{{base_url}}/users/user/",
+              "host": ["{{base_url}}"],
+              "path": ["users", "user"]
+            }
+          }
+        },
+        {
+          "name": "Update User Information",
+          "request": {
+            "method": "PUT",
+            "header": [{"key": "Authorization", "value": "Bearer {{access_token}}"}],
+            "body": {"mode": "raw", "raw": "{\"new_name\": \"updated_user\"}"},
+            "url": {
+              "raw": "{{base_url}}/users/user/",
+              "host": ["{{base_url}}"],
+              "path": ["users", "user"]
+            }
+          }
+        },
+        {
+          "name": "Change User Password",
+          "request": {
+            "method": "PUT",
+            "header": [{"key": "Authorization", "value": "Bearer {{access_token}}"}],
+            "body": {"mode": "raw", "raw": "{\"new_password\": \"newpassword123\"}"},
+            "url": {
+              "raw": "{{base_url}}/users/user/password",
+              "host": ["{{base_url}}"],
+              "path": ["users", "user", "password"]
+            }
+          }
+        },
+        {
+          "name": "Get Leaderboard",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{access_token}}"}],
+            "url": {
+              "raw": "{{base_url}}/users/leaderboard",
+              "host": ["{{base_url}}"],
+              "path": ["users", "leaderboard"]
             }
           }
         }
@@ -49,11 +93,8 @@
           "name": "Create Task",
           "request": {
             "method": "POST",
-            "header": [],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"type\": \"image_classification\",\n  \"data\": \"image_url.jpg\",\n  \"point\": 10,\n  \"tags\": [\"tag1\", \"tag2\"],\n  \"is_done\": false\n}"
-            },
+            "header": [{"key": "Authorization", "value": "Bearer {{access_token}}"}],
+            "body": {"mode": "raw", "raw": "{\"type\": \"image_classification\", \"data\": \"image_url.jpg\", \"point\": 10, \"tags\": [\"tag1\", \"tag2\"], \"is_done\": false}"},
             "url": {
               "raw": "{{base_url}}/tasks/new",
               "host": ["{{base_url}}"],
@@ -65,17 +106,12 @@
           "name": "Fetch Task Feed",
           "request": {
             "method": "GET",
-            "header": [],
+            "header": [{"key": "Authorization", "value": "Bearer {{access_token}}"}],
             "url": {
               "raw": "{{base_url}}/tasks/feed?limit=5",
               "host": ["{{base_url}}"],
               "path": ["tasks", "feed"],
-              "query": [
-                {
-                  "key": "limit",
-                  "value": "5"
-                }
-              ]
+              "query": [{"key": "limit", "value": "5"}]
             }
           }
         }
@@ -83,9 +119,7 @@
     }
   ],
   "variable": [
-    {
-      "key": "base_url",
-      "value": "http://127.0.0.1:8000"
-    }
+    {"key": "base_url", "value": "http://127.0.0.1:8000"},
+    {"key": "access_token", "value": ""}
   ]
 }
