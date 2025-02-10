@@ -1,250 +1,125 @@
 {
   "info": {
-    "_postman_id": "769ee221-2985-4043-bece-a2bbcb682ee7",
-    "name": "Barchasb",
-    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-    "_exporter_id": "2746376",
-    "_collection_link": "https://sarv-team.postman.co/workspace/Team-Workspace~5703e441-e555-4b06-8779-66543ec90bf7/collection/2746376-769ee221-2985-4043-bece-a2bbcb682ee7?action=share&source=collection_link&creator=2746376"
+    "_postman_id": "barchasb-backend-collection",
+    "name": "Barchasb Backend API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
     {
-      "name": "auth",
+      "name": "User Management",
       "item": [
         {
-          "name": "Signup",
+          "name": "Register User",
           "request": {
             "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"username\": \"saeed\",\n  \"password\": \"SecureP@ssw0rd!\"\n}"
-            },
+            "header": [],
+            "body": {"mode": "raw", "raw": "{\"name\": \"testuser\", \"password\": \"password123\", \"points\": 100}"},
             "url": {
-              "raw": "{{base_url}}/api/v1/auth/signup",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "auth",
-                "signup"
-              ]
+              "raw": "{{base_url}}/users/signup",
+              "host": ["{{base_url}}"],
+              "path": ["users", "signup"]
             }
-          },
-          "response": []
+          }
         },
         {
-          "name": "Login",
+          "name": "User Login",
           "request": {
             "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"username\": \"saeed\",\n  \"password\": \"SecureP@ssw0rd!\"\n}"
-            },
+            "header": [],
+            "body": {"mode": "raw", "raw": "{\"name\": \"testuser\", \"password\": \"password123\"}"},
             "url": {
-              "raw": "{{base_url}}/api/v1/auth/login",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "auth",
-                "login"
-              ]
+              "raw": "{{base_url}}/users/login",
+              "host": ["{{base_url}}"],
+              "path": ["users", "login"]
             }
-          },
-          "response": []
+          }
         },
         {
-          "name": "Logout",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-              }
-            ],
-            "url": {
-              "raw": "{{base_url}}/api/v1/auth/logout",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "auth",
-                "logout"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Protected Route",
+          "name": "Get User Information",
           "request": {
             "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-              }
-            ],
+            "header": [{"key": "Authorization", "value": "Bearer {{access_token}}"}],
             "url": {
-              "raw": "{{base_url}}/api/v1/auth/protected-route",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "auth",
-                "protected-route"
-              ]
+              "raw": "{{base_url}}/users/user/",
+              "host": ["{{base_url}}"],
+              "path": ["users", "user"]
             }
-          },
-          "response": []
+          }
         },
         {
-          "name": "me",
+          "name": "Update User Information",
+          "request": {
+            "method": "PUT",
+            "header": [{"key": "Authorization", "value": "Bearer {{access_token}}"}],
+            "body": {"mode": "raw", "raw": "{\"new_name\": \"updated_user\"}"},
+            "url": {
+              "raw": "{{base_url}}/users/user/",
+              "host": ["{{base_url}}"],
+              "path": ["users", "user"]
+            }
+          }
+        },
+        {
+          "name": "Change User Password",
+          "request": {
+            "method": "PUT",
+            "header": [{"key": "Authorization", "value": "Bearer {{access_token}}"}],
+            "body": {"mode": "raw", "raw": "{\"new_password\": \"newpassword123\"}"},
+            "url": {
+              "raw": "{{base_url}}/users/user/password",
+              "host": ["{{base_url}}"],
+              "path": ["users", "user", "password"]
+            }
+          }
+        },
+        {
+          "name": "Get Leaderboard",
           "request": {
             "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-              }
-            ],
+            "header": [{"key": "Authorization", "value": "Bearer {{access_token}}"}],
             "url": {
-              "raw": "{{base_url}}/api/v1/auth/me",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "auth",
-                "me"
-              ]
+              "raw": "{{base_url}}/users/leaderboard",
+              "host": ["{{base_url}}"],
+              "path": ["users", "leaderboard"]
             }
-          },
-          "response": []
+          }
         }
       ]
     },
     {
-      "name": "task",
+      "name": "Task Management",
       "item": [
         {
-          "name": "Get Task Feed",
+          "name": "Create Task",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Authorization", "value": "Bearer {{access_token}}"}],
+            "body": {"mode": "raw", "raw": "{\"type\": \"image_classification\", \"data\": \"image_url.jpg\", \"point\": 10, \"tags\": [\"tag1\", \"tag2\"], \"is_done\": false}"},
+            "url": {
+              "raw": "{{base_url}}/tasks/new",
+              "host": ["{{base_url}}"],
+              "path": ["tasks", "new"]
+            }
+          }
+        },
+        {
+          "name": "Fetch Task Feed",
           "request": {
             "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}",
-                "type": "text"
-              }
-            ],
+            "header": [{"key": "Authorization", "value": "Bearer {{access_token}}"}],
             "url": {
-              "raw": "{{base_url}}/api/v1/tasks/feed",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "tasks",
-                "feed"
-              ]
+              "raw": "{{base_url}}/tasks/feed?limit=5",
+              "host": ["{{base_url}}"],
+              "path": ["tasks", "feed"],
+              "query": [{"key": "limit", "value": "5"}]
             }
-          },
-          "response": []
-        },
-        {
-          "name": "Submit Task",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}",
-                "type": "text"
-              },
-              {
-                "key": "Content-Type",
-                "value": "application/json",
-                "type": "text"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\"id\": 1, \"user_id\": 1, \"task_id\": 1, \"content\": {\"transcription\": \"This is a test\"}}"
-            },
-            "url": {
-              "raw": "{{base_url}}/api/v1/tasks/submit",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "tasks",
-                "submit"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Report Task",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}",
-                "type": "text"
-              },
-              {
-                "key": "Content-Type",
-                "value": "application/json",
-                "type": "text"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\"task_id\": 2}"
-            },
-            "url": {
-              "raw": "{{base_url}}/api/v1/tasks/report",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "tasks",
-                "report"
-              ]
-            }
-          },
-          "response": []
+          }
         }
       ]
     }
+  ],
+  "variable": [
+    {"key": "base_url", "value": "http://127.0.0.1:8000"},
+    {"key": "access_token", "value": ""}
   ]
 }
