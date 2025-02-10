@@ -41,14 +41,18 @@ def test_create_task(db_session):
     assert response_data["status"] == "success"
 
 
-def test_get_tasks(db_session):
-    response = client.get("/tasks/feed", params={"limit": 10})
-    assert response.status_code == 200
-    assert isinstance(response.json(), list)
-
-
 def test_get_task_feed(db_session):
-    response = client.get("/tasks/feed", params={"limit": 2})
+    signup_response = client.post("/users/signup", json={
+        "name": "feed_test_user",
+        "password": "SecureP@ssw0rd!"
+    })
+    login_response = client.post("/users/login", json={
+        "name": "feed_test_user",
+        "password": "SecureP@ssw0rd!"
+    })
+    access_token = login_response.json()["access_token"]
+    headers = {"Authorization": f"Bearer {access_token}"}
+    response = client.get("/tasks/feed", params={"limit": 2}, headers=headers)
     assert response.status_code == 200
     tasks = response.json()
     assert isinstance(tasks, list)
@@ -62,6 +66,13 @@ def test_submit_task(db_session):
         "password": "SecureP@ssw0rd!"
     })
     user_id = response.json()["id"]
+    login_response = client.post("/users/login", json={
+        "name": "submit_task_user",
+        "password": "SecureP@ssw0rd!"
+    })
+    access_token = login_response.json()["access_token"]
+    headers = {"Authorization": f"Bearer {access_token}"}
+
     task_payload = {
         "type": "image",
         "data": {"url": "/path/to/file3"},
@@ -73,9 +84,8 @@ def test_submit_task(db_session):
     task_response = client.post("/tasks/new", json=task_payload)
     assert task_response.status_code == 200
     task_id = task_response.json()["task_id"]
-    # Submit task
     submit_payload = {"user_id": user_id, "task_id": task_id, "content": {"string": "Urgent task"}}
-    submit_response = client.post("/tasks/submit", json=submit_payload)
+    submit_response = client.post("/tasks/submit", json=submit_payload, headers=headers)
     assert submit_response.status_code == 200
     submission_data = submit_response.json()
     assert submission_data["status"] == "success"
@@ -84,6 +94,13 @@ def test_submit_task(db_session):
 def test_report_task(db_session):
     response = client.post("/users/signup", json={"name": "report_user", "password": "SecureP@ssw0rd!"})
     user_id = response.json()["id"]
+
+    login_response = client.post("/users/login", json={
+        "name": "report_user",
+        "password": "SecureP@ssw0rd!"
+    })
+    access_token = login_response.json()["access_token"]
+    headers = {"Authorization": f"Bearer {access_token}"}
     # Pre-create a task to retrieve its ID
     task_payload = {
         "type": "image",
@@ -99,7 +116,7 @@ def test_report_task(db_session):
 
     # Report task
     report_payload = {"task_id": task_id, "user_id": user_id, "detail": "Incorrect labeling"}
-    report_response = client.post("/tasks/report", json=report_payload)
+    report_response = client.post("/tasks/report", json=report_payload, headers=headers)
     assert report_response.status_code == 200
     report_data = report_response.json()
     assert report_data["status"] == "success"

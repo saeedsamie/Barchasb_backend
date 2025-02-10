@@ -25,14 +25,6 @@ def db_session():
     db_manager.drop_db()  # Cleanup the database after tests
 
 
-def get_auth_headers(user_id: str):
-    """
-    Helper function to generate headers with a valid access token.
-    """
-    access_token = create_access_token({"user_id": user_id})
-    return {"Authorization": f"Bearer {access_token}"}
-
-
 def test_create_user_success(db_session):
     response = client.post("/users/signup", json={
         "name": "signup_test_user",
@@ -52,7 +44,6 @@ def test_create_user_duplicate(db_session):
 def test_login_user_success(db_session):
     client.post("/users/signup", json={"name": "login_user", "password": "SecureP@ssw0rd!"})
     response = client.post("/users/login", json={"name": "login_user", "password": "SecureP@ssw0rd!"})
-    print(response.json())
 
     assert response.status_code == 200
     assert "access_token" in response.json()
