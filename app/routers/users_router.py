@@ -82,7 +82,7 @@ def update_user_information(user_update: UserUpdate, current_user=Depends(get_cu
     return {'id': user.id, 'name': user.name, 'points': user.points, 'label_count': user.labeled_count}
 
 
-@router.put("/user/{user_id}/password", response_model=dict)
+@router.put("/user/password", response_model=dict)
 def update_user_password(user_password: UserChangePassword, current_user=Depends(get_current_user),
                          db: Session = Depends(db_manager.get_db)):
     user = change_password(db, user_id=current_user.id, new_password=user_password.new_password)
