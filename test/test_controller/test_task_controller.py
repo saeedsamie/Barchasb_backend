@@ -7,6 +7,7 @@ from app.controller.task_controller import (
     add_task,
     mark_task_done,
 )
+from app.controller.user_controller import create_user
 from app.models.Task import Task
 
 # Initialize the DatabaseManager with the test database URL
@@ -44,6 +45,7 @@ def test_add_task(test_session):
 def test_get_task_feed(test_session):
     db_manager.drop_db()
     db_manager.init_db()
+    user = create_user(test_session, name="task_feed_user", password="SecureP@ssw0rd!")
     """Test retrieving tasks that are not marked as done."""
     # Add tasks to the database
     task1 = add_task(
@@ -63,7 +65,7 @@ def test_get_task_feed(test_session):
     mark_task_done(db=test_session, task_id=task1.id)  # Mark one task as done
 
     # Fetch task feedy
-    task_feed = get_task_feed(db=test_session)
+    task_feed = get_task_feed(user_id=user.id, db=test_session)
     assert len(task_feed) == 1
     assert task_feed[0].id == task2.id  # Only the unfinished task should be in the feed
 
