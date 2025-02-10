@@ -35,7 +35,7 @@ def create_task(task: TaskCreate, db: Session = Depends(db_manager.get_db)):
 @router.get("/feed", response_model=List[TaskCreate])
 def fetch_task_feed(limit: int, current_user=Depends(get_current_user), db: Session = Depends(db_manager.get_db)):
     try:
-        tasks = get_task_feed(db)
+        tasks = get_task_feed(current_user.id, db)
         return [TaskCreate(
             status="success",
             task_id=task.id,

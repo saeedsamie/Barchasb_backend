@@ -2,6 +2,7 @@ import uuid
 
 from sqlalchemy.orm import Session
 
+from app.models import TaskLabel, TaskReport
 from app.models.Task import Task
 
 
@@ -10,8 +11,18 @@ def list_done_tasks(db: Session):
     return db.query(Task).filter(Task.is_done == True).all()
 
 
-def get_task_feed(db: Session):
-    return db.query(Task).filter(Task.is_done == False).all()
+def get_task_feed(user_id: uuid, db: Session):
+    try:
+        # Fetch tasks that are not completed and not labeled or reported by the user
+        tasks = db.query(Task).filter(
+            Task.is_done == False,
+            ~Task.id.in_(db.query(TaskLabel.task_id).filter(TaskLabel.user_id == user_id)),
+            ~Task.id.in_(db.query(TaskReport.task_id).filter(TaskReport.user_id == user_id))
+        ).all()
+        return tasks
+    except Exception as e:
+        print(f"Error fetching task feed: {e}")
+        return []
 
 
 def add_task(db: Session, type: str, data: dict, point: int, is_done: bool = False, tags: list = None):
