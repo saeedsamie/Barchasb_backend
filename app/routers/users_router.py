@@ -29,7 +29,7 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
     return user
 
 
-@router.post("/signup", response_model=dict)
+@router.post("/signup", response_model=dict, status_code=201)
 def create_user_route(user: UserCreate, db: Session = Depends(db_manager.get_db)):
     try:
         created_user = create_user(db, name=user.name, password=user.password, points=user.points)

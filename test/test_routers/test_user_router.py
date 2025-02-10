@@ -38,6 +38,7 @@ def test_create_user_success(db_session):
         "name": "signup_test_user",
         "password": "SecureP@ssw0rd!"
     })
+    print(response.json())
     assert response.status_code == 201
     assert response.json()["name"] == "signup_test_user"
 
