@@ -17,7 +17,7 @@ from app.schemas.taskReport import TaskReport
 db_manager = DatabaseManager()
 
 router = APIRouter(prefix="/tasks", tags=["tasks"])
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/users/login")
 
 
 @router.post("/new", response_model=TaskResponse)

@@ -18,7 +18,7 @@ from app.utils.JWT_helper import decode_access_token
 db_manager = DatabaseManager()
 
 router = APIRouter(prefix="/users")
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/users/login")
 
 
 def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(db_manager.get_db)):
