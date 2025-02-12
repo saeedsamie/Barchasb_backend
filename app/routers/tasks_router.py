@@ -46,12 +46,19 @@ async def create_task(task: TaskCreate, db: Session = Depends(db_manager.get_db)
             tags=task.tags,
             is_done=task.is_done
         )
-        return TaskResponse(status="success", task_id=created_task.id)
+        return TaskResponse(id=created_task.id,
+                            type=created_task.type,
+                            data=created_task.data,
+                            point=created_task.point,
+                            title=created_task.title,
+                            description=created_task.description,
+                            tags=created_task.tags,
+                            is_done=created_task.is_done)
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@router.get("/feed", response_model=List[TaskCreate])
+@router.get("/feed", response_model=List[TaskResponse])
 async def fetch_task_feed(limit: int = Query(..., gt=0), current_user=Depends(get_current_user),
                           db: Session = Depends(db_manager.get_db)):
     """
@@ -70,9 +77,8 @@ async def fetch_task_feed(limit: int = Query(..., gt=0), current_user=Depends(ge
     """
     try:
         tasks = get_task_feed(current_user.id, db)
-        return [TaskCreate(
-            status="success",
-            task_id=task.id,
+        return [TaskResponse(
+            id=task.id,
             type=task.type,
             data=task.data,
             point=task.point,

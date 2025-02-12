@@ -58,9 +58,8 @@ class TestTaskCreation:
         response = client.post("/tasks/new", json=sample_task)
         assert response.status_code == 201
         data = response.json()
-        assert "task_id" in data
-        assert data["status"] == "success"
-        assert isinstance(data["task_id"], str)
+        assert "id" in data
+        assert "title" in data
 
     def test_create_task_invalid_points(self, db_session):
         """Test task creation with invalid points."""
@@ -99,6 +98,7 @@ class TestTaskFeed:
 
         if tasks:
             task = tasks[0]
+            assert "id" in task
             assert "type" in task
             assert "data" in task
             assert "point" in task
@@ -122,7 +122,7 @@ class TestTaskSubmission:
         """Test successful task submission."""
         # Create a task first
         task_response = client.post("/tasks/new", json=sample_task)
-        task_id = task_response.json()["task_id"]
+        task_id = task_response.json()["id"]
 
         # Include user_id in the payload
         user_response = client.get("/users/user/", headers=auth_headers)
@@ -153,7 +153,7 @@ class TestTaskSubmission:
     def test_submit_task_invalid_content(self, db_session, auth_headers, sample_task):
         """Test submitting a task with invalid content."""
         task_response = client.post("/tasks/new", json=sample_task)
-        task_id = task_response.json()["task_id"]
+        task_id = task_response.json()["id"]
 
         submit_payload = {
             "task_id": task_id,
@@ -166,7 +166,7 @@ class TestTaskReporting:
     def test_report_task_success(self, db_session, auth_headers, sample_task):
         """Test successful task reporting."""
         task_response = client.post("/tasks/new", json=sample_task)
-        task_id = task_response.json()["task_id"]
+        task_id = task_response.json()["id"]
 
         # Include user_id in the payload
         user_response = client.get("/users/user/", headers=auth_headers)
@@ -200,7 +200,7 @@ class TestTaskReporting:
     def test_report_task_invalid_detail(self, db_session, auth_headers, sample_task, invalid_detail):
         """Test reporting a task with invalid details."""
         task_response = client.post("/tasks/new", json=sample_task)
-        task_id = task_response.json()["task_id"]
+        task_id = task_response.json()["id"]
 
         report_payload = {
             "detail": invalid_detail
