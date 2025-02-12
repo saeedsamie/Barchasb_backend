@@ -1,4 +1,5 @@
 import uuid
+
 import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
@@ -14,6 +15,7 @@ client = TestClient(app)
 
 db_manager = DatabaseManager()
 
+
 @pytest.fixture(scope="module")
 def db_session():
     """Set up the database using DatabaseManager and yield a session."""
@@ -22,6 +24,7 @@ def db_session():
     yield session
     session.close()
     db_manager.drop_db()
+
 
 @pytest.fixture
 def auth_headers(db_session):
@@ -35,6 +38,7 @@ def auth_headers(db_session):
     token = response.json()["access_token"]
     return {"Authorization": f"Bearer {token}"}
 
+
 @pytest.fixture
 def sample_task():
     """Return a sample task payload."""
@@ -46,6 +50,7 @@ def sample_task():
         "point": 10,
         "tags": ["urgent"]
     }
+
 
 class TestTaskCreation:
     def test_create_task_success(self, db_session, sample_task):
@@ -79,18 +84,19 @@ class TestTaskCreation:
         response = client.post("/tasks/new", json=invalid_task)
         assert response.status_code == 422
 
+
 class TestTaskFeed:
     def test_get_task_feed_success(self, db_session, auth_headers, sample_task):
         """Test successful retrieval of task feed."""
         # Create a task first
         client.post("/tasks/new", json=sample_task)
-        
+
         response = client.get("/tasks/feed", params={"limit": 2}, headers=auth_headers)
         assert response.status_code == 200
         tasks = response.json()
         assert isinstance(tasks, list)
         assert len(tasks) <= 2
-        
+
         if tasks:
             task = tasks[0]
             assert "type" in task
@@ -110,20 +116,20 @@ class TestTaskFeed:
         assert response.status_code == 422  # Pydantic validation error
         assert "greater than" in response.json()["detail"][0]["msg"]
 
+
 class TestTaskSubmission:
     def test_submit_task_success(self, db_session, auth_headers, sample_task):
         """Test successful task submission."""
         # Create a task first
         task_response = client.post("/tasks/new", json=sample_task)
         task_id = task_response.json()["task_id"]
-        
+
         # Include user_id in the payload
         user_response = client.get("/users/user/", headers=auth_headers)
         user_id = user_response.json()["id"]
-        
+
         submit_payload = {
             "task_id": task_id,
-            "user_id": user_id,
             "content": {"label": "test_label"}
         }
         response = client.post("/tasks/submit", json=submit_payload, headers=auth_headers)
@@ -135,10 +141,9 @@ class TestTaskSubmission:
         # Get current user ID
         user_response = client.get("/users/user/", headers=auth_headers)
         user_id = user_response.json()["id"]
-        
+
         submit_payload = {
             "task_id": str(uuid.uuid4()),
-            "user_id": user_id,  # Add user_id
             "content": {"label": "test_label"}
         }
         response = client.post("/tasks/submit", json=submit_payload, headers=auth_headers)
@@ -149,41 +154,26 @@ class TestTaskSubmission:
         """Test submitting a task with invalid content."""
         task_response = client.post("/tasks/new", json=sample_task)
         task_id = task_response.json()["task_id"]
-        
+
         submit_payload = {
             "task_id": task_id,
-            "content": None
         }
         response = client.post("/tasks/submit", json=submit_payload, headers=auth_headers)
         assert response.status_code == 422
 
-    def test_submit_task_unauthorized_user(self, db_session, auth_headers, sample_task):
-        """Test submitting a task for another user."""
-        task_response = client.post("/tasks/new", json=sample_task)
-        task_id = task_response.json()["task_id"]
-        
-        submit_payload = {
-            "task_id": task_id,
-            "user_id": str(uuid.uuid4()),  # Different user_id
-            "content": {"label": "test_label"}
-        }
-        response = client.post("/tasks/submit", json=submit_payload, headers=auth_headers)
-        assert response.status_code == 403
-        assert "Not authorized" in response.json()["detail"]
 
 class TestTaskReporting:
     def test_report_task_success(self, db_session, auth_headers, sample_task):
         """Test successful task reporting."""
         task_response = client.post("/tasks/new", json=sample_task)
         task_id = task_response.json()["task_id"]
-        
+
         # Include user_id in the payload
         user_response = client.get("/users/user/", headers=auth_headers)
         user_id = user_response.json()["id"]
-        
+
         report_payload = {
             "task_id": task_id,
-            "user_id": user_id,
             "detail": "Issue with task instructions"
         }
         response = client.post("/tasks/report", json=report_payload, headers=auth_headers)
@@ -194,10 +184,9 @@ class TestTaskReporting:
         """Test reporting a non-existent task."""
         user_response = client.get("/users/user/", headers=auth_headers)
         user_id = user_response.json()["id"]
-        
+
         report_payload = {
             "task_id": str(uuid.uuid4()),
-            "user_id": user_id,
             "detail": "Task does not exist"
         }
         response = client.post("/tasks/report", json=report_payload, headers=auth_headers)
@@ -212,9 +201,8 @@ class TestTaskReporting:
         """Test reporting a task with invalid details."""
         task_response = client.post("/tasks/new", json=sample_task)
         task_id = task_response.json()["task_id"]
-        
+
         report_payload = {
-            "task_id": task_id,
             "detail": invalid_detail
         }
         response = client.post("/tasks/report", json=report_payload, headers=auth_headers)
