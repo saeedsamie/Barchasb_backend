@@ -11,8 +11,18 @@ services:
       - .:/app
     restart: unless-stopped
     environment:
-      - DATABASE_URL=postgresql://admin:admin@Barchasb.bz91.ir:5432/barchasb_db
+      - DATABASE_URL=postgresql://admin:admin@postgres:5432/barchasb_db
       - SECRET_KEY=barchasb_secret_key
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
+
   postgres:
     image: postgres:15  # PostgreSQL version
     container_name: postgres_server
@@ -25,6 +35,12 @@ services:
       - "5432:5432"                        # Expose PostgreSQL on default port
     volumes:
       - postgres_data:/var/lib/postgresql/data  # Persist PostgreSQL data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d barchasb_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
 
   pgadmin:
     image: dpage/pgadmin4                  # PGAdmin image
@@ -36,9 +52,16 @@ services:
     ports:
       - "5050:80"                             # Expose PGAdmin on port 5050
     depends_on:
-      - postgres                             # Ensure PostgreSQL starts before PGAdmin
+      postgres:
+        condition: service_healthy
     volumes:
       - pgadmin_data:/var/lib/pgadmin        # Persist PGAdmin data
+    healthcheck:
+      test: ["CMD", "wget", "-O-", "http://localhost:80/misc/ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
 
 volumes:
   postgres_data:
