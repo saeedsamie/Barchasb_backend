@@ -22,10 +22,11 @@ load_dotenv()
 # Create declarative base
 Base = declarative_base()
 
+
 class DatabaseManager:
     _instance: Optional['DatabaseManager'] = None
     _initialized: bool = False
-    
+
     def __new__(cls, testing: bool = False) -> 'DatabaseManager':
         """Implement singleton pattern to ensure single database connection."""
         if cls._instance is None:
@@ -38,7 +39,7 @@ class DatabaseManager:
         # Skip if already initialized
         if self._initialized:
             return
-            
+
         self._initialized = True
         self.database_url = self._get_database_url()
         self.engine = self._create_engine()
@@ -53,12 +54,12 @@ class DatabaseManager:
         """Get database URL from environment variables."""
         env_var = "TEST_DATABASE_URL" if self.testing else "DATABASE_URL"
         database_url = os.getenv(env_var)
-        
+
         if not database_url:
             error_msg = f"{env_var} not found in environment variables"
             logger.error(error_msg)
             raise ValueError(error_msg)
-            
+
         return database_url
 
     def _create_engine(self) -> Engine:

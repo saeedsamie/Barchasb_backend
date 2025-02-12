@@ -1,10 +1,12 @@
 from typing import Optional, List, Dict
 from uuid import UUID
 
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, ConfigDict, field_validator
 
 
 class TaskBase(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: Optional[UUID]
     type: str
     data: dict
@@ -13,9 +15,6 @@ class TaskBase(BaseModel):
     point: int = 10
     is_done: bool = False
     tags: Optional[List[str]] = []
-
-    class Config:
-        from_attributes = True
 
 
 class TaskCreate(BaseModel):
@@ -27,13 +26,15 @@ class TaskCreate(BaseModel):
     is_done: bool = False
     tags: Optional[List[str]] = []
 
-    @validator('point')
+    @field_validator('point')
+    @classmethod
     def validate_points(cls, v):
         if v < 0:
             raise ValueError("Points cannot be negative")
         return v
 
-    @validator('tags')
+    @field_validator('tags')
+    @classmethod
     def validate_tags(cls, v):
         if v and len(v) > 10:  # Maximum 10 tags
             raise ValueError('Maximum 10 tags allowed')

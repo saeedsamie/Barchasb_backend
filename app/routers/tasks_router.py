@@ -33,8 +33,8 @@ async def create_task(task: TaskCreate, db: Session = Depends(db_manager.get_db)
 
 
 @router.get("/feed", response_model=List[TaskCreate])
-async def fetch_task_feed(limit: int = Query(..., gt=0), current_user=Depends(get_current_user), 
-                         db: Session = Depends(db_manager.get_db)):
+async def fetch_task_feed(limit: int = Query(..., gt=0), current_user=Depends(get_current_user),
+                          db: Session = Depends(db_manager.get_db)):
     """
     Get task feed with pagination.
     
@@ -57,7 +57,7 @@ async def fetch_task_feed(limit: int = Query(..., gt=0), current_user=Depends(ge
 
 @router.post("/submit", response_model=dict)
 async def submit_existing_task(label: LabelCreate, current_user=Depends(get_current_user),
-                             db: Session = Depends(db_manager.get_db)):
+                               db: Session = Depends(db_manager.get_db)):
     try:
         # First check authorization before any database operations
         if label.user_id != current_user.id:
@@ -67,20 +67,20 @@ async def submit_existing_task(label: LabelCreate, current_user=Depends(get_curr
             )
 
         submission_result = submit_label(
-            db, 
-            task_id=label.task_id, 
+            db,
+            task_id=label.task_id,
             user_id=label.user_id,
             content=str(label.content)
         )
-        
+
         if not submission_result:
             raise HTTPException(
-                status_code=400, 
+                status_code=400,
                 detail="Failed to submit label"
             )
 
         return {
-            "status": "success", 
+            "status": "success",
             "message": f"Task successfully submitted {submission_result.id}"
         }
     except HTTPException:
@@ -89,7 +89,7 @@ async def submit_existing_task(label: LabelCreate, current_user=Depends(get_curr
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
         raise HTTPException(
-            status_code=400, 
+            status_code=400,
             detail=f"Submission failed: {str(e)}"
         )
 
