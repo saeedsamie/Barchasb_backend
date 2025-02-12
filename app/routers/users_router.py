@@ -49,7 +49,7 @@ async def login_user_route(user: UserLogin = Body(...), db: Session = Depends(db
 
 @router.get("/leaderboard", response_model=list)
 async def get_leader_board(current_user: dict = Depends(get_current_user),
-                     db: Session = Depends(db_manager.get_db)):
+                           db: Session = Depends(db_manager.get_db)):
     """
     Retrieve a list of users sorted by points in descending order.
     """
@@ -84,7 +84,7 @@ def update_user_information(user_update: UserUpdate, current_user=Depends(get_cu
 
 @router.put("/user/password", response_model=dict)
 async def update_user_password(user_password: UserChangePassword, current_user=Depends(get_current_user),
-                         db: Session = Depends(db_manager.get_db)):
+                               db: Session = Depends(db_manager.get_db)):
     user = change_password(db, user_id=current_user.id, new_password=user_password.new_password)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")

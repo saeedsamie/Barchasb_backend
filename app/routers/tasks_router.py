@@ -1,6 +1,6 @@
 from typing import List
 
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, Query
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 
@@ -20,9 +20,21 @@ router = APIRouter(prefix="/tasks", tags=["tasks"])
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/users/login")
 
 
-@router.post("/new", response_model=TaskResponse)
-# todo Needs different type of authority
+@router.post("/new", response_model=TaskResponse, status_code=201)
 async def create_task(task: TaskCreate, db: Session = Depends(db_manager.get_db)):
+    """
+    Create a new task in the system.
+
+    Args:
+        task (TaskCreate): Task creation data including type, data, points, and tags
+        db (Session): Database session dependency
+
+    Returns:
+        TaskResponse: Response containing task ID and status
+
+    Raises:
+        HTTPException: If task creation fails
+    """
     try:
         created_task = add_task(
             db, type=task.type, data=task.data, point=task.point, tags=task.tags, is_done=task.is_done
@@ -33,7 +45,22 @@ async def create_task(task: TaskCreate, db: Session = Depends(db_manager.get_db)
 
 
 @router.get("/feed", response_model=List[TaskCreate])
-async def fetch_task_feed(limit: int, current_user=Depends(get_current_user), db: Session = Depends(db_manager.get_db)):
+async def fetch_task_feed(limit: int = Query(..., gt=0), current_user=Depends(get_current_user),
+                         db: Session = Depends(db_manager.get_db)):
+    """
+    Get a paginated feed of available tasks for the current user.
+    
+    Args:
+        limit (int): Maximum number of tasks to return
+        current_user (User): Current authenticated user
+        db (Session): Database session dependency
+
+    Returns:
+        List[TaskCreate]: List of available tasks
+
+    Raises:
+        HTTPException: If fetching tasks fails
+    """
     try:
         tasks = get_task_feed(current_user.id, db)
         return [TaskCreate(
@@ -50,21 +77,75 @@ async def fetch_task_feed(limit: int, current_user=Depends(get_current_user), db
 
 @router.post("/submit", response_model=dict)
 async def submit_existing_task(label: LabelCreate, current_user=Depends(get_current_user),
-                         db: Session = Depends(db_manager.get_db)):
+                             db: Session = Depends(db_manager.get_db)):
+    """
+    Submit a label for an existing task.
+
+    Args:
+        label (LabelCreate): Label data including task_id and content
+        current_user (User): Current authenticated user
+        db (Session): Database session dependency
+
+    Returns:
+        dict: Success message with submission ID
+
+    Raises:
+        HTTPException: If submission fails or user is not authorized
+    """
     try:
-        # Ensure user_id and task_id exist before committing
-        submission_result = submit_label(db, task_id=label.task_id, user_id=label.user_id,
-                                         content=str(label.content))
-        return {"status": "success", "message": f"Task successfully submitted {submission_result.id}"}
+        # First check authorization before any database operations
+        if label.user_id != current_user.id:
+            raise HTTPException(
+                status_code=403,
+                detail="Not authorized to submit for another user"
+            )
+
+        submission_result = submit_label(
+            db,
+            task_id=label.task_id,
+            user_id=label.user_id,
+            content=str(label.content)
+        )
+
+        if not submission_result:
+            raise HTTPException(
+                status_code=400,
+                detail="Failed to submit label"
+            )
+
+        return {
+            "status": "success",
+            "message": f"Task successfully submitted {submission_result.id}"
+        }
+    except HTTPException:
+        raise  # Re-raise HTTP exceptions as-is
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
-        raise HTTPException(status_code=400, detail=f"Submission failed: {str(e)}")
+        raise HTTPException(
+            status_code=400,
+            detail=f"Submission failed: {str(e)}"
+        )
 
 
 @router.post("/report", response_model=dict)
 async def report_existing_task(task_report: TaskReport, current_user=Depends(get_current_user),
-                         db: Session = Depends(db_manager.get_db)):
+                               db: Session = Depends(db_manager.get_db)):
+    """
+    Report an issue with an existing task.
+
+    Args:
+        task_report (TaskReport): Report data including task_id and details
+        current_user (User): Current authenticated user
+        db (Session): Database session dependency
+
+    Returns:
+        dict: Success message with report ID
+
+    Raises:
+        HTTPException: If report submission fails
+    """
     try:
-        # Validate the report and save
         report_result = report_task(db, task_id=task_report.task_id, user_id=task_report.user_id,
                                     details=task_report.detail)
         return {"status": "success", "message": f"Task report successfully created {report_result.id}"}
