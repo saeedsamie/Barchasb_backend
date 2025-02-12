@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from slowapi.util import get_remote_address
+from datetime import datetime
 
 from app.DatabaseManager import DatabaseManager
 from app.routers import users_router, tasks_router
@@ -34,6 +35,8 @@ app.include_router(users_router.router, prefix="/api/v1", tags=["users"])
 app.include_router(tasks_router.router, prefix="/api/v1", tags=["tasks"])
 
 
-@app.get("/")
-def root():
-    return {"message": "Welcome to Barchasb Backend!"}
+
+@app.get("/health")
+async def health_check():
+    """Health check endpoint for container orchestration"""
+    return {"status": "healthy", "timestamp": datetime.now().isoformat()}
