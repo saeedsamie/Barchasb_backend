@@ -34,7 +34,7 @@ async def create_task(task: TaskCreate, db: Session = Depends(db_manager.get_db)
 
 @router.get("/feed", response_model=List[TaskCreate])
 async def fetch_task_feed(limit: int = Query(..., gt=0), current_user=Depends(get_current_user),
-                          db: Session = Depends(db_manager.get_db)):
+                         db: Session = Depends(db_manager.get_db)):
     """
     Get task feed with pagination.
     
@@ -57,7 +57,7 @@ async def fetch_task_feed(limit: int = Query(..., gt=0), current_user=Depends(ge
 
 @router.post("/submit", response_model=dict)
 async def submit_existing_task(label: LabelCreate, current_user=Depends(get_current_user),
-                               db: Session = Depends(db_manager.get_db)):
+                             db: Session = Depends(db_manager.get_db)):
     try:
         # First check authorization before any database operations
         if label.user_id != current_user.id:

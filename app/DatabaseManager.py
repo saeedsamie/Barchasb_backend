@@ -22,7 +22,6 @@ load_dotenv()
 # Create declarative base
 Base = declarative_base()
 
-
 class DatabaseManager:
     _instance: Optional['DatabaseManager'] = None
     _initialized: bool = False
