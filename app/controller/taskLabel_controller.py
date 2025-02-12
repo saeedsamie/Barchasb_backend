@@ -8,10 +8,35 @@ from app.models.TaskLabel import TaskLabel
 
 
 def list_labeled_tasks_by_user(db: Session, user_id: uuid.UUID):
+    """
+    Get all tasks that have been labeled by a specific user.
+
+    Args:
+        db (Session): SQLAlchemy database session
+        user_id (uuid.UUID): ID of the user whose labels to retrieve
+
+    Returns:
+        list[TaskLabel]: List of task labels created by the user
+    """
     return db.query(TaskLabel).filter(TaskLabel.user_id == user_id).all()
 
 
 def submit_label(db: Session, user_id: uuid.UUID, task_id: uuid.UUID, content: str):
+    """
+    Submit a new label for a task and update user points.
+
+    Args:
+        db (Session): SQLAlchemy database session
+        user_id (uuid.UUID): ID of the user submitting the label
+        task_id (uuid.UUID): ID of the task being labeled
+        content (str): The label content
+
+    Returns:
+        TaskLabel: The created label object
+
+    Raises:
+        ValueError: If user or task not found, or on database error
+    """
     try:
         label = TaskLabel(user_id=user_id, task_id=task_id, content=content)
         db.add(label)
@@ -36,6 +61,17 @@ def submit_label(db: Session, user_id: uuid.UUID, task_id: uuid.UUID, content: s
 
 
 def calculate_consensus(db: Session, task_id: uuid.UUID):
+    """
+    Calculate the consensus label for a task based on submitted labels.
+    Marks task as done if consensus is reached with more than 5 labels.
+
+    Args:
+        db (Session): SQLAlchemy database session
+        task_id (uuid.UUID): ID of the task to calculate consensus for
+
+    Returns:
+        Task: The updated task object if consensus reached, None otherwise
+    """
     labels = db.query(TaskLabel).filter(TaskLabel.task_id == task_id).all()
     if labels:
         content_votes = {}

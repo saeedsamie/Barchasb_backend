@@ -21,8 +21,20 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/users/login")
 
 
 @router.post("/new", response_model=TaskResponse, status_code=201)
-# todo Needs different type of authority
 async def create_task(task: TaskCreate, db: Session = Depends(db_manager.get_db)):
+    """
+    Create a new task in the system.
+
+    Args:
+        task (TaskCreate): Task creation data including type, data, points, and tags
+        db (Session): Database session dependency
+
+    Returns:
+        TaskResponse: Response containing task ID and status
+
+    Raises:
+        HTTPException: If task creation fails
+    """
     try:
         created_task = add_task(
             db, type=task.type, data=task.data, point=task.point, tags=task.tags, is_done=task.is_done
@@ -36,10 +48,18 @@ async def create_task(task: TaskCreate, db: Session = Depends(db_manager.get_db)
 async def fetch_task_feed(limit: int = Query(..., gt=0), current_user=Depends(get_current_user),
                          db: Session = Depends(db_manager.get_db)):
     """
-    Get task feed with pagination.
+    Get a paginated feed of available tasks for the current user.
     
     Args:
-        limit: Number of tasks to return (must be greater than 0)
+        limit (int): Maximum number of tasks to return
+        current_user (User): Current authenticated user
+        db (Session): Database session dependency
+
+    Returns:
+        List[TaskCreate]: List of available tasks
+
+    Raises:
+        HTTPException: If fetching tasks fails
     """
     try:
         tasks = get_task_feed(current_user.id, db)
@@ -58,6 +78,20 @@ async def fetch_task_feed(limit: int = Query(..., gt=0), current_user=Depends(ge
 @router.post("/submit", response_model=dict)
 async def submit_existing_task(label: LabelCreate, current_user=Depends(get_current_user),
                              db: Session = Depends(db_manager.get_db)):
+    """
+    Submit a label for an existing task.
+
+    Args:
+        label (LabelCreate): Label data including task_id and content
+        current_user (User): Current authenticated user
+        db (Session): Database session dependency
+
+    Returns:
+        dict: Success message with submission ID
+
+    Raises:
+        HTTPException: If submission fails or user is not authorized
+    """
     try:
         # First check authorization before any database operations
         if label.user_id != current_user.id:
@@ -97,8 +131,21 @@ async def submit_existing_task(label: LabelCreate, current_user=Depends(get_curr
 @router.post("/report", response_model=dict)
 async def report_existing_task(task_report: TaskReport, current_user=Depends(get_current_user),
                                db: Session = Depends(db_manager.get_db)):
+    """
+    Report an issue with an existing task.
+
+    Args:
+        task_report (TaskReport): Report data including task_id and details
+        current_user (User): Current authenticated user
+        db (Session): Database session dependency
+
+    Returns:
+        dict: Success message with report ID
+
+    Raises:
+        HTTPException: If report submission fails
+    """
     try:
-        # Validate the report and save
         report_result = report_task(db, task_id=task_report.task_id, user_id=task_report.user_id,
                                     details=task_report.detail)
         return {"status": "success", "message": f"Task report successfully created {report_result.id}"}
