@@ -26,7 +26,7 @@ async def create_task(task: TaskCreate, db: Session = Depends(db_manager.get_db)
     Create a new task in the system.
 
     Args:
-        task (TaskCreate): Task creation data including type, data, points, and tags
+        task (TaskCreate): Task creation data including type, data, points, title, description and tags
         db (Session): Database session dependency
 
     Returns:
@@ -37,7 +37,14 @@ async def create_task(task: TaskCreate, db: Session = Depends(db_manager.get_db)
     """
     try:
         created_task = add_task(
-            db, type=task.type, data=task.data, point=task.point, tags=task.tags, is_done=task.is_done
+            db,
+            type=task.type,
+            data=task.data,
+            point=task.point,
+            title=task.title,
+            description=task.description,
+            tags=task.tags,
+            is_done=task.is_done
         )
         return TaskResponse(status="success", task_id=created_task.id)
     except Exception as e:
@@ -69,6 +76,8 @@ async def fetch_task_feed(limit: int = Query(..., gt=0), current_user=Depends(ge
             type=task.type,
             data=task.data,
             point=task.point,
+            title=task.title,
+            description=task.description,
             tags=task.tags,
         ) for task in tasks][-limit:]
     except Exception as e:
