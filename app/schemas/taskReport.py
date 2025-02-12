@@ -1,9 +1,8 @@
 from uuid import UUID
-
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class TaskReport(BaseModel):
-    user_id: UUID
     task_id: UUID
-    detail: str
+    user_id: UUID
+    detail: str = Field(..., min_length=1, max_length=1000)

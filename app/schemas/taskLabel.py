@@ -1,7 +1,7 @@
-from typing import Optional
+from typing import Optional, Dict
 from uuid import UUID
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 # Label Schema
@@ -16,9 +16,9 @@ class LabelBase(BaseModel):
 
 
 class LabelCreate(BaseModel):
-    user_id: UUID
     task_id: UUID
-    content: dict
+    user_id: UUID
+    content: Dict = Field(..., description="Label content in JSON format")
 
 
 class LabelResponse(LabelBase):

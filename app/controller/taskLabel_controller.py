@@ -1,5 +1,6 @@
 import uuid
 
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from app.models import Task, User
@@ -11,19 +12,27 @@ def list_labeled_tasks_by_user(db: Session, user_id: uuid.UUID):
 
 
 def submit_label(db: Session, user_id: uuid.UUID, task_id: uuid.UUID, content: str):
-    label = TaskLabel(user_id=user_id, task_id=task_id, content=content)
-    db.add(label)
+    try:
+        label = TaskLabel(user_id=user_id, task_id=task_id, content=content)
+        db.add(label)
 
-    user = db.query(User).filter(User.id == user_id).first()
-    task = db.query(Task).filter(Task.id == task_id).first()
+        user = db.query(User).filter(User.id == user_id).first()
+        if not user:
+            db.rollback()
+            raise ValueError("User not found")
 
-    if user and task:
+        task = db.query(Task).filter(Task.id == task_id).first()
+        if not task:
+            db.rollback()
+            raise ValueError("Task not found")
+
         user.points += task.point
         user.labeled_count += 1
         db.commit()
         return label
-    db.rollback()
-    return None
+    except SQLAlchemyError as e:
+        db.rollback()
+        raise ValueError(f"Database error: {str(e)}")
 
 
 def calculate_consensus(db: Session, task_id: uuid.UUID):
