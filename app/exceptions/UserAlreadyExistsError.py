@@ -9,7 +9,7 @@ class UserAlreadyExistsError(Exception):
 
     def __init__(self, username: str):
         self.username = username
-        self.message = f"User with username '{username}' already exists"
+        self.message = f"User with name '{username}' already exists."
         super().__init__(self.message)
 
     def __str__(self):

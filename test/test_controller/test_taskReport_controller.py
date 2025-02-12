@@ -28,7 +28,14 @@ def test_report_task(test_session):
     """Test reporting a task using report_task."""
     # Create a user and a task
     user = User(name="reporter", password="securepassword")
-    task = Task(type="classification", data={"example": "data"}, point=10, tags=["tag1"])
+    task = Task(
+        type="classification", 
+        data={"example": "data"}, 
+        point=10, 
+        title="Report Test Task",  # Added title
+        description="Task for testing reports",  # Added description
+        tags=["tag1"]
+    )
     test_session.add_all([user, task])
     test_session.commit()
 
@@ -64,8 +71,22 @@ def test_list_reported_tasks_by_user(test_session):
     """Test listing reported tasks by a specific user."""
     # Create a user and tasks
     user = User(name="task_reporter", password="anotherpassword")
-    task1 = Task(type="classification", data={"example": "task1"}, point=5, tags=["tag1"])
-    task2 = Task(type="classification", data={"example": "task2"}, point=10, tags=["tag2"])
+    task1 = Task(
+        type="classification", 
+        data={"example": "task1"}, 
+        point=5, 
+        title="First Report Task",  # Added title
+        description="First task for reporting",  # Added description
+        tags=["tag1"]
+    )
+    task2 = Task(
+        type="classification", 
+        data={"example": "task2"}, 
+        point=10, 
+        title="Second Report Task",  # Added title
+        description="Second task for reporting",  # Added description
+        tags=["tag2"]
+    )
     test_session.add_all([user, task1, task2])
     test_session.commit()
 

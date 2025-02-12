@@ -22,7 +22,15 @@ def test_session():
 
 def test_task_model(test_session):
     """Test creation and relationship of Task model."""
-    task = Task(type="classification", data={"key": "value"}, point=10, tags=["urgent", "important"], is_done=False)
+    task = Task(
+        type="classification", 
+        data={"key": "value"}, 
+        point=10, 
+        title="Test Task",  # Added title
+        description="This is a test task",  # Added description
+        tags=["urgent", "important"], 
+        is_done=False
+    )
     test_session.add(task)
     test_session.commit()
 
@@ -30,6 +38,8 @@ def test_task_model(test_session):
     assert saved_task is not None
     assert saved_task.type == "classification"
     assert saved_task.point == 10
+    assert saved_task.title == "Test Task"  # Verify title
+    assert saved_task.description == "This is a test task"  # Verify description
     assert "urgent" in saved_task.tags
     assert saved_task.is_done is False  # Verify the default value of is_done
 
@@ -50,7 +60,14 @@ def test_user_model(test_session):
 def test_task_label_model(test_session):
     """Test creation and relationship of TaskLabel model."""
     user = User(name="labeler", password="labelpass")
-    task = Task(type="annotation", data={"example": "data"}, point=5, is_done=False)
+    task = Task(
+        type="annotation", 
+        data={"example": "data"}, 
+        point=5, 
+        title="Label Test Task",  # Added title
+        description="Task for testing labels",  # Added description
+        is_done=False
+    )
     test_session.add_all([user, task])
     test_session.commit()
 
@@ -67,7 +84,14 @@ def test_task_label_model(test_session):
 def test_task_report_model(test_session):
     """Test creation and relationship of TaskReport model."""
     user = User(name="reporter", password="reportpass")
-    task = Task(type="report", data={"report": "data"}, point=2, is_done=False)
+    task = Task(
+        type="report", 
+        data={"report": "data"}, 
+        point=2, 
+        title="Report Test Task",  # Added title
+        description="Task for testing reports",  # Added description
+        is_done=False
+    )
     test_session.add_all([user, task])
     test_session.commit()
 
@@ -85,7 +109,15 @@ def test_task_report_model(test_session):
 def test_task_with_labels_and_reports_relationship(test_session):
     """Test relationships between Task, TaskLabel, and TaskReport."""
     # Create a task
-    task = Task(type="complex", data={"task": "data"}, point=15, tags=["tag1", "tag2"], is_done=True)
+    task = Task(
+        type="complex", 
+        data={"task": "data"}, 
+        point=15, 
+        title="Complex Task",  # Added title
+        description="Task for testing relationships",  # Added description
+        tags=["tag1", "tag2"], 
+        is_done=True
+    )
     test_session.add(task)
     test_session.commit()
 
@@ -113,7 +145,14 @@ def test_user_with_labels_and_reports_relationship(test_session):
     """Test relationships between User, TaskLabel, and TaskReport."""
     # Create a user and task
     user = User(name="user2", password="securepass")
-    task = Task(type="basic", data={"task": "info"}, point=5, is_done=False)
+    task = Task(
+        type="basic", 
+        data={"task": "info"}, 
+        point=5, 
+        title="Basic Task",  # Added title
+        description="Task for testing user relationships",  # Added description
+        is_done=False
+    )
     test_session.add_all([user, task])
     test_session.commit()
 

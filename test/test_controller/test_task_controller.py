@@ -31,6 +31,8 @@ def test_add_task(test_session):
         type="classification",
         data={"key": "value"},
         point=10,
+        title="Test Task",
+        description="This is a test task",
         tags=["urgent", "important"],
         is_done=False
     )
@@ -38,6 +40,8 @@ def test_add_task(test_session):
     assert task.type == "classification"
     assert task.data == {"key": "value"}
     assert task.point == 10
+    assert task.title == "Test Task"
+    assert task.description == "This is a test task"
     assert task.is_done == False
     assert "urgent" in task.tags
 
@@ -53,6 +57,8 @@ def test_get_task_feed(test_session):
         type="classification",
         data={"example": "task1"},
         point=5,
+        title="Task 1",
+        description="First test task",
         tags=["tag1"],
     )
     task2 = add_task(
@@ -60,11 +66,13 @@ def test_get_task_feed(test_session):
         type="classification",
         data={"example": "task2"},
         point=10,
+        title="Task 2",
+        description="Second test task",
         tags=["tag2"],
     )
     mark_task_done(db=test_session, task_id=task1.id)  # Mark one task as done
 
-    # Fetch task feedy
+    # Fetch task feed
     task_feed = get_task_feed(user_id=user.id, db=test_session)
     assert len(task_feed) == 1
     assert task_feed[0].id == task2.id  # Only the unfinished task should be in the feed
@@ -79,6 +87,8 @@ def test_list_done_tasks(test_session):
         type="classification",
         data={"example": "task1"},
         point=5,
+        title="Done Task 1",
+        description="First task to be marked as done",
         tags=["tag1"],
     )
     task2 = add_task(
@@ -86,6 +96,8 @@ def test_list_done_tasks(test_session):
         type="classification",
         data={"example": "task2"},
         point=10,
+        title="Done Task 2",
+        description="Second task to remain undone",
         tags=["tag2"],
     )
     mark_task_done(db=test_session, task_id=task1.id)  # Mark one task as done
@@ -95,6 +107,8 @@ def test_list_done_tasks(test_session):
         type="classification",
         data={"example": "task3"},
         point=15,
+        title="Done Task 3",
+        description="Third task to be marked as done",
         tags=["tag3"],
     )
     mark_task_done(db=test_session, task_id=task3.id)
@@ -112,6 +126,8 @@ def test_mark_task_done(test_session):
         type="classification",
         data={"example": "task4"},
         point=20,
+        title="Task to Mark Done",
+        description="Task that will be marked as done",
         tags=["tag4"],
     )
 

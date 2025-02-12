@@ -29,7 +29,14 @@ def test_submit_label(test_session):
     """Test submitting a label using submit_label."""
     # Create a user and a task
     user = User(name="labeler", password="securepass")
-    task = Task(type="classification", data={"example": "data"}, point=10, tags=["tag1"])
+    task = Task(
+        type="classification", 
+        data={"example": "data"}, 
+        point=10, 
+        title="Test Task",  # Added title
+        description="Test task for labeling",  # Added description
+        tags=["tag1"]
+    )
     test_session.add_all([user, task])
     test_session.commit()
 
@@ -71,8 +78,22 @@ def test_list_labeled_tasks_by_user(test_session):
     """Test listing labeled tasks by a specific user."""
     # Create a user and tasks
     user = User(name="task_labeler", password="password")
-    task1 = Task(type="classification", data={"example": "task1"}, point=5, tags=["tag1"])
-    task2 = Task(type="classification", data={"example": "task2"}, point=10, tags=["tag2"])
+    task1 = Task(
+        type="classification", 
+        data={"example": "task1"}, 
+        point=5, 
+        title="First Task",  # Added title
+        description="First test task",  # Added description
+        tags=["tag1"]
+    )
+    task2 = Task(
+        type="classification", 
+        data={"example": "task2"}, 
+        point=10, 
+        title="Second Task",  # Added title
+        description="Second test task",  # Added description
+        tags=["tag2"]
+    )
     test_session.add_all([user, task1, task2])
     test_session.commit()
 
@@ -90,7 +111,14 @@ def test_list_labeled_tasks_by_user(test_session):
 def test_calculate_consensus(test_session):
     """Test calculating consensus for a task."""
     # Create a task and labels
-    task = Task(type="classification", data={"example": "consensus_task"}, point=10, tags=["tag1"])
+    task = Task(
+        type="classification", 
+        data={"example": "consensus_task"}, 
+        point=10, 
+        title="Consensus Task",  # Added title
+        description="Task for testing consensus",  # Added description
+        tags=["tag1"]
+    )
     test_session.add(task)
     test_session.commit()
 
@@ -110,7 +138,14 @@ def test_calculate_consensus(test_session):
 def test_submit_label_with_exception(test_session):
     """Test submitting a label when database error occurs."""
     user = User(name="error_labeler", password="password")
-    task = Task(type="classification", data={"example": "error_task"}, point=5, tags=["tag1"])
+    task = Task(
+        type="classification", 
+        data={"example": "error_task"}, 
+        point=5, 
+        title="Error Test Task",  # Added title
+        description="Task for testing errors",  # Added description
+        tags=["tag1"]
+    )
     test_session.add_all([user, task])
     test_session.commit()
 
@@ -127,7 +162,14 @@ def test_submit_label_with_exception(test_session):
 
 def test_calculate_consensus_no_labels(test_session):
     """Test calculating consensus when there are no labels."""
-    task = Task(type="classification", data={"example": "no_labels"}, point=5, tags=["tag1"])
+    task = Task(
+        type="classification", 
+        data={"example": "no_labels"}, 
+        point=5, 
+        title="No Labels Task",  # Added title
+        description="Task for testing no labels",  # Added description
+        tags=["tag1"]
+    )
     test_session.add(task)
     test_session.commit()
 
@@ -137,7 +179,14 @@ def test_calculate_consensus_no_labels(test_session):
 
 def test_calculate_consensus_not_enough_labels(test_session):
     """Test calculating consensus with fewer than required labels."""
-    task = Task(type="classification", data={"example": "few_labels"}, point=5, tags=["tag1"])
+    task = Task(
+        type="classification", 
+        data={"example": "few_labels"}, 
+        point=5, 
+        title="Few Labels Task",  # Added title
+        description="Task for testing consensus with few labels",  # Added description
+        tags=["tag1"]
+    )
     test_session.add(task)
     test_session.commit()
 
@@ -165,7 +214,14 @@ def test_list_labeled_tasks_empty(test_session):
 
 def test_submit_label_user_not_found(test_session):
     """Test submitting a label with non-existent user."""
-    task = Task(type="classification", data={"example": "task"}, point=5, tags=["tag1"])
+    task = Task(
+        type="classification", 
+        data={"example": "task"}, 
+        point=5, 
+        title="User Not Found Task",  # Added title
+        description="Task for testing user not found",  # Added description
+        tags=["tag1"]
+    )
     test_session.add(task)
     test_session.commit()
 

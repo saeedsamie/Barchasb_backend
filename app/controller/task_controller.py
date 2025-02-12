@@ -49,7 +49,7 @@ def get_task_feed(user_id: uuid, db: Session):
         return []
 
 
-def add_task(db: Session, type: str, data: dict, point: int, is_done: bool = False, tags: list = None):
+def add_task(db: Session, type: str, data: dict, point: int, title: str, description: str, is_done: bool = False, tags: list = None):
     """
     Create a new task in the database.
 
@@ -58,13 +58,23 @@ def add_task(db: Session, type: str, data: dict, point: int, is_done: bool = Fal
         type (str): Type of task (e.g. 'image', 'text')
         data (dict): Task-specific data
         point (int): Points awarded for completing the task
+        title (str): Title of the task
+        description (str): Description of the task
         is_done (bool, optional): Whether task is completed. Defaults to False.
         tags (list, optional): List of tags for the task. Defaults to None.
 
     Returns:
         Task: The created task object
     """
-    task = Task(type=type, data=data, point=point, is_done=is_done, tags=tags or [])
+    task = Task(
+        type=type, 
+        data=data, 
+        point=point, 
+        title=title,
+        description=description,
+        is_done=is_done, 
+        tags=tags or []
+    )
     db.add(task)
     db.commit()
     db.refresh(task)

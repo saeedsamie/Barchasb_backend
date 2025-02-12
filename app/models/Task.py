@@ -14,6 +14,8 @@ class Task(Base):
     type = Column(String, nullable=False)
     data = Column(JSON, nullable=False)
     point = Column(Integer, nullable=False)
+    title = Column(String(200), nullable=False)
+    description = Column(String(1000), nullable=False)
     tags = Column(ARRAY(String))
     is_done = Column(Boolean, default=False)
 
