@@ -30,7 +30,7 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
 
 
 @router.post("/signup", response_model=dict, status_code=201)
-def create_user_route(user: UserCreate, db: Session = Depends(db_manager.get_db)):
+async def create_user_route(user: UserCreate, db: Session = Depends(db_manager.get_db)):
     try:
         created_user = create_user(db, name=user.name, password=user.password, points=user.points)
         return {"id": str(created_user.id), "name": created_user.name}
@@ -39,7 +39,7 @@ def create_user_route(user: UserCreate, db: Session = Depends(db_manager.get_db)
 
 
 @router.post("/login", response_model=dict)
-def login_user_route(user: UserLogin = Body(...), db: Session = Depends(db_manager.get_db)):
+async def login_user_route(user: UserLogin = Body(...), db: Session = Depends(db_manager.get_db)):
     try:
         _, token = login_user(db, name=user.name, password=user.password)
         return {"access_token": token}
@@ -48,7 +48,7 @@ def login_user_route(user: UserLogin = Body(...), db: Session = Depends(db_manag
 
 
 @router.get("/leaderboard", response_model=list)
-def get_leader_board(current_user: dict = Depends(get_current_user),
+async def get_leader_board(current_user: dict = Depends(get_current_user),
                      db: Session = Depends(db_manager.get_db)):
     """
     Retrieve a list of users sorted by points in descending order.
@@ -66,7 +66,7 @@ def get_leader_board(current_user: dict = Depends(get_current_user),
 
 
 @router.get("/user/", response_model=dict)
-def get_user_information(current_user=Depends(get_current_user), db: Session = Depends(db_manager.get_db)):
+async def get_user_information(current_user=Depends(get_current_user), db: Session = Depends(db_manager.get_db)):
     user = current_user
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
@@ -83,7 +83,7 @@ def update_user_information(user_update: UserUpdate, current_user=Depends(get_cu
 
 
 @router.put("/user/password", response_model=dict)
-def update_user_password(user_password: UserChangePassword, current_user=Depends(get_current_user),
+async def update_user_password(user_password: UserChangePassword, current_user=Depends(get_current_user),
                          db: Session = Depends(db_manager.get_db)):
     user = change_password(db, user_id=current_user.id, new_password=user_password.new_password)
     if not user:

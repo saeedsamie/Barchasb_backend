@@ -22,7 +22,7 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/users/login")
 
 @router.post("/new", response_model=TaskResponse)
 # todo Needs different type of authority
-def create_task(task: TaskCreate, db: Session = Depends(db_manager.get_db)):
+async def create_task(task: TaskCreate, db: Session = Depends(db_manager.get_db)):
     try:
         created_task = add_task(
             db, type=task.type, data=task.data, point=task.point, tags=task.tags, is_done=task.is_done
@@ -33,7 +33,7 @@ def create_task(task: TaskCreate, db: Session = Depends(db_manager.get_db)):
 
 
 @router.get("/feed", response_model=List[TaskCreate])
-def fetch_task_feed(limit: int, current_user=Depends(get_current_user), db: Session = Depends(db_manager.get_db)):
+async def fetch_task_feed(limit: int, current_user=Depends(get_current_user), db: Session = Depends(db_manager.get_db)):
     try:
         tasks = get_task_feed(current_user.id, db)
         return [TaskCreate(
@@ -49,7 +49,7 @@ def fetch_task_feed(limit: int, current_user=Depends(get_current_user), db: Sess
 
 
 @router.post("/submit", response_model=dict)
-def submit_existing_task(label: LabelCreate, current_user=Depends(get_current_user),
+async def submit_existing_task(label: LabelCreate, current_user=Depends(get_current_user),
                          db: Session = Depends(db_manager.get_db)):
     try:
         # Ensure user_id and task_id exist before committing
@@ -61,7 +61,7 @@ def submit_existing_task(label: LabelCreate, current_user=Depends(get_current_us
 
 
 @router.post("/report", response_model=dict)
-def report_existing_task(task_report: TaskReport, current_user=Depends(get_current_user),
+async def report_existing_task(task_report: TaskReport, current_user=Depends(get_current_user),
                          db: Session = Depends(db_manager.get_db)):
     try:
         # Validate the report and save
