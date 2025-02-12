@@ -1,12 +1,14 @@
 from datetime import datetime, timedelta
+import os
 
 from fastapi import HTTPException
 from jose import jwt, JWTError, ExpiredSignatureError
+from dotenv import load_dotenv
 
-SECRET_KEY = "your-secret-key"  # Replace with a secure key in production
+load_dotenv()
+SECRET_KEY = os.getenv("SECRET_KEY")
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = timedelta(minutes=5)  # Token expires after 30 minutes
-
+ACCESS_TOKEN_EXPIRE_MINUTES = timedelta(minutes=15)
 
 def create_access_token(data: dict, expires_delta=ACCESS_TOKEN_EXPIRE_MINUTES):
     """
@@ -14,7 +16,7 @@ def create_access_token(data: dict, expires_delta=ACCESS_TOKEN_EXPIRE_MINUTES):
     """
     to_encode = data.copy()
     expire = datetime.utcnow() + expires_delta
-    to_encode.update({"exp": expire})
+    to_encode.update({"exp": expire, "iat": datetime.utcnow()})
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
 

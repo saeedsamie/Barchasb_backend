@@ -12,6 +12,7 @@ services:
     restart: unless-stopped
     environment:
       - DATABASE_URL=postgresql://admin:admin@Barchasb.bz91.ir:5432/barchasb_db
+      - SECRET_KEY=barchasb_secret_key
   postgres:
     image: postgres:15  # PostgreSQL version
     container_name: postgres_server
