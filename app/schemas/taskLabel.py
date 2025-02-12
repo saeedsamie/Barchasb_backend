@@ -15,7 +15,6 @@ class LabelBase(BaseModel):
 
 class LabelCreate(BaseModel):
     task_id: UUID
-    user_id: UUID
     content: Dict = Field(
         ..., 
         description="Label content in JSON format",

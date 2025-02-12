@@ -11,7 +11,7 @@ from app.controller.task_controller import add_task, get_task_feed
 from app.routers.users_router import get_current_user
 from app.schemas.task import TaskCreate, TaskResponse
 from app.schemas.taskLabel import LabelCreate
-from app.schemas.taskReport import TaskReport
+from app.schemas.taskReport import CreateTaskReport
 
 # Initialize the database manager
 db_manager = DatabaseManager()
@@ -53,7 +53,7 @@ async def create_task(task: TaskCreate, db: Session = Depends(db_manager.get_db)
 
 @router.get("/feed", response_model=List[TaskCreate])
 async def fetch_task_feed(limit: int = Query(..., gt=0), current_user=Depends(get_current_user),
-                         db: Session = Depends(db_manager.get_db)):
+                          db: Session = Depends(db_manager.get_db)):
     """
     Get a paginated feed of available tasks for the current user.
     
@@ -86,7 +86,7 @@ async def fetch_task_feed(limit: int = Query(..., gt=0), current_user=Depends(ge
 
 @router.post("/submit", response_model=dict)
 async def submit_existing_task(label: LabelCreate, current_user=Depends(get_current_user),
-                             db: Session = Depends(db_manager.get_db)):
+                               db: Session = Depends(db_manager.get_db)):
     """
     Submit a label for an existing task.
 
@@ -102,17 +102,10 @@ async def submit_existing_task(label: LabelCreate, current_user=Depends(get_curr
         HTTPException: If submission fails or user is not authorized
     """
     try:
-        # First check authorization before any database operations
-        if label.user_id != current_user.id:
-            raise HTTPException(
-                status_code=403,
-                detail="Not authorized to submit for another user"
-            )
-
         submission_result = submit_label(
             db,
             task_id=label.task_id,
-            user_id=label.user_id,
+            user_id=current_user.id,
             content=str(label.content)
         )
 
@@ -138,13 +131,13 @@ async def submit_existing_task(label: LabelCreate, current_user=Depends(get_curr
 
 
 @router.post("/report", response_model=dict)
-async def report_existing_task(task_report: TaskReport, current_user=Depends(get_current_user),
+async def report_existing_task(task_report: CreateTaskReport, current_user=Depends(get_current_user),
                                db: Session = Depends(db_manager.get_db)):
     """
     Report an issue with an existing task.
 
     Args:
-        task_report (TaskReport): Report data including task_id and details
+        task_report (CreateTaskReport): Report data including task_id and details
         current_user (User): Current authenticated user
         db (Session): Database session dependency
 
@@ -155,7 +148,7 @@ async def report_existing_task(task_report: TaskReport, current_user=Depends(get
         HTTPException: If report submission fails
     """
     try:
-        report_result = report_task(db, task_id=task_report.task_id, user_id=task_report.user_id,
+        report_result = report_task(db, task_id=task_report.task_id, user_id=current_user.id,
                                     details=task_report.detail)
         return {"status": "success", "message": f"Task report successfully created {report_result.id}"}
     except Exception as e:
