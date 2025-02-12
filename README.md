@@ -2,7 +2,7 @@
 
 ## Overview
 
-**Barchasb Backend** is the backend API for the Barchasb distributed system. It is built with **FastAPI** and provides the core functionality for user management, task distribution, and data labeling through a crowdsourcing model. The backend supports scalable storage and seamless integration with the mobile application.
+**Barchasb Backend** is the backend API for the Barchasb distributed system. Built with **FastAPI**, it provides core functionalities for user management, task distribution, and data labeling through a crowdsourcing model. The backend supports scalable storage and seamless integration with the mobile application.
 
 ---
 
@@ -11,37 +11,30 @@
 ### Backend Functionality
 
 - **User Management**:
-  - Signup and Login.
-  - User Session Management.
-  - Signout functionality.
-  - View personal performance metrics.
+    - User Registration and Authentication.
+    - Profile Management.
+    - View Personal Performance Metrics.
 - **Task Management**:
-  - View available tasks.
-  - Submit labels for tasks.
-  - Report corrupted tasks.
-  - Crowdsourcing-based consensus for labels.
+    - Create and View Tasks.
+    - Submit Labels for Tasks.
+    - Report Issues with Tasks.
 - **Leaderboard**:
-  - Track user rankings based on points earned.
-  - Rewards for accuracy and consistency.
-- **Notifications**:
-  - Send updates about new datasets and urgent tasks.
+    - View User Rankings Based on Points Earned.
 - **Scalable Data Storage**:
-  - Store labeled datasets securely in MinIO or other storage solutions.
+    - Secure Storage of Labeled Datasets.
 
 ---
 
 ## System Architecture
 
-The backend is designed to support the distributed labeling system:
-
-### Core Components
+The backend is designed to support the distributed labeling system with the following core components:
 
 - **Modular Routers**:
-  - Users: Handles user registration, authentication, and profile management.
-  - Tasks: Manages task distribution, submissions, and reporting.
-  - Leaderboard: Provides rankings and performance metrics.
+    - **Users**: Handles user registration, authentication, and profile management.
+    - **Tasks**: Manages task creation, distribution, submissions, and reporting.
+    - **Leaderboard**: Provides user rankings and performance metrics.
 - **Storage**:
-  - Supports integration with MinIO for scalable and secure dataset storage.
+    - Supports integration with scalable and secure dataset storage solutions.
 
 ---
 
@@ -50,31 +43,47 @@ The backend is designed to support the distributed labeling system:
 ### Prerequisites
 
 - Python 3.8+
-- MinIO (optional for production-grade storage)
+- Database (e.g., PostgreSQL, MySQL, SQLite)
 
 ### Steps
 
-1. Clone the repository:
+1. **Clone the Repository**:
 
    ```bash
-   git clone https://github.com/your-repo/barchasb-backend.git
+   git clone https://github.com/saeedsamie/barchasb-backend.git
    cd barchasb-backend
    ```
 
-2. Install dependencies:
+2. **Set Up Virtual Environment**:
+
+   ```bash
+   python3 -m venv env
+   source env/bin/activate  # On Windows, use `env\Scripts\activate`
+   ```
+
+3. **Install Dependencies**:
 
    ```bash
    pip install -r requirements.txt
    ```
 
-3. Run the server:
+4. **Configure Environment Variables**:
+
+   Create a `.env` file in the root directory and add your environment-specific variables, such as database connection details and secret keys.
+
+5. **Apply Database Migrations**:
+
+   Ensure your database is set up and apply any necessary migrations.
+
+6. **Run the Server**:
 
    ```bash
    uvicorn app.main:app --reload
    ```
 
-4. Access the API documentation:
-   - Open [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs) in your browser.
+7. **Access the API Documentation**:
+
+   Open [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs) in your browser to view the interactive API documentation.
 
 ---
 
@@ -82,40 +91,81 @@ The backend is designed to support the distributed labeling system:
 
 ### User Management
 
-- `POST /auth/signup` - Register a new user.
-- `POST /auth/login` - Login with username and password.
-- `GET /auth/me` - Get current user details.
-- `POST /auth/logout` - Logout a user.
+- **Register a New User**
+  - **Endpoint**: `POST /users/signup`
+  - **Description**: Registers a new user.
+  - **Request Body**:
+    - `name` (string): The user's name.
+    - `password` (string): The user's password.
+    - `points` (integer, optional): Initial points for the user.
+  - **Response**:
+    - `id` (string): The unique identifier of the created user.
+    - `name` (string): The name of the created user.
+
+- **User Login**
+  - **Endpoint**: `POST /users/login`
+  - **Description**: Authenticates a user and returns an access token.
+  - **Request Body**:
+    - `name` (string): The user's name.
+    - `password` (string): The user's password.
+  - **Response**:
+    - `access_token` (string): The JWT access token for the authenticated user.
+
+- **Get User Information**
+  - **Endpoint**: `GET /users/user/`
+  - **Description**: Retrieves the authenticated user's information.
+  - **Response**:
+    - `id` (string): The user's unique identifier.
+    - `name` (string): The user's name.
+    - `points` (integer): The user's points.
+    - `label_count` (integer): The count of labels submitted by the user.
+
+- **Update User Information**
+  - **Endpoint**: `PUT /users/user/`
+  - **Description**: Updates the authenticated user's information.
+  - **Request Body**:
+    - `new_name` (string, optional): The new name for the user.
+  - **Response**:
+    - `id` (string): The user's unique identifier.
+    - `name` (string): The updated name of the user.
+    - `points` (integer): The user's points.
+    - `label_count` (integer): The count of labels submitted by the user.
+
+- **Change User Password**
+  - **Endpoint**: `PUT /users/user/password`
+  - **Description**: Changes the authenticated user's password.
+  - **Request Body**:
+    - `new_password` (string): The new password for the user.
+  - **Response**:
+    - `id` (string): The user's unique identifier.
+    - `result` (string): Confirmation message indicating the password was updated.
 
 ### Task Management
 
-- `GET /tasks` - Retrieve a list of tasks.
-- `GET /tasks/{task_id}` - Get details of a specific task.
-- `POST /tasks/{task_id}/submit` - Submit a label for a task.
-- `POST /tasks/report` - Report corrupted tasks.
+- **Create a New Task**
+  - **Endpoint**: `POST /tasks/new`
+  - **Description**: Creates a new task.
+  - **Request Body**:
+    - `type` (string): The type of task.
+    - `data` (string): The data associated with the task.
+    - `point` (integer): The points assigned to the task.
+    - `tags` (list of strings, optional): Tags associated with the task.
+    - `is_done` (boolean, optional): Status indicating if the task is completed.
+  - **Response**:
+    - `status` (string): Status of the operation.
+    - `task_id` (string): The unique identifier of the created task.
 
-### Leaderboard
-
-- `GET /leaderboard` - View rankings of users.
-
----
-
-## Contributing
-
-1. Fork the repository.
-2. Create a new branch:
-   ```bash
-   git checkout -b feature-name
-   ```
-3. Commit your changes:
-   ```bash
-   git commit -m "Add feature-name"
-   ```
-4. Push to the branch:
-   ```bash
-   git push origin feature-name
-   ```
-5. Create a pull request.
+- **Fetch Task Feed**
+  - **Endpoint**: `GET /tasks/feed`
+  - **Description**: Retrieves a feed of available tasks.
+  - **Query Parameters**:
+    - `limit` (integer): The number of tasks to retrieve.
+  - **Response**:
+    - A list of tasks, each containing:
+      - `type` (string): The type of task.
+      - `data` (string): The data associated with the task.
+      - `point` (integer): The points assigned to the task.
+      - `tags` (list of strings): Tags associated with the task.
 
 ---
 
@@ -130,4 +180,5 @@ This project is licensed under the [MIT License](LICENSE).
 For inquiries or contributions, please reach out to:
 
 - **Email:** support@barchasb.com
-- **GitHub:** [Barchasb Backend Repo](https://github.com/your-repo)
+- **GitHub:** [Barchasb Backend Repo](https://github.com/saeedsamie)
+

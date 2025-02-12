@@ -1,19 +1,37 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.middleware.cors import CORSMiddleware
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
+from slowapi.util import get_remote_address
 
-from app.routers import users, tasks, leaderboard
+from app.DatabaseManager import DatabaseManager
+from app.routers import users_router, tasks_router
 
+limiter = Limiter(key_func=get_remote_address)
 app = FastAPI()
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
-app.include_router(users.router, prefix="/api/v1/auth", tags=["auth"])
-app.include_router(tasks.router, prefix="/api/v1/tasks", tags=["tasks"])
-app.include_router(leaderboard.router, prefix="/api/v1/leaderboard", tags=["leaderboard"])
+# Add CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # In production, replace with specific origins
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
-# Example tasks for demonstration
-tasks_db = {
-    1: {"id": 1, "title": "Label Images", "description": "Label a set of images for object detection",
-        "total_labels": 0},
-    2: {"id": 2, "title": "Transcribe Audio", "description": "Transcribe audio recordings to text", "total_labels": 0}
-}
+
+@app.middleware("http")
+async def db_session_middleware(request: Request, call_next):
+    response = await call_next(request)
+    return response
+
+
+db_manager = DatabaseManager()
+db_manager.init_db()
+app.include_router(users_router.router, prefix="/api/v1", tags=["users"])
+app.include_router(tasks_router.router, prefix="/api/v1", tags=["tasks"])
 
 
 @app.get("/")
