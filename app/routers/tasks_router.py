@@ -5,11 +5,11 @@ from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 
 from app.DatabaseManager import DatabaseManager
-from app.controller.taskLabel_controller import submit_label
+from app.controller.taskLabel_controller import submit_label, get_label_by_task
 from app.controller.taskReport_controller import report_task
 from app.controller.task_controller import add_task, get_task_feed, get_user_labeled_tasks
 from app.routers.users_router import get_current_user
-from app.schemas.task import TaskCreate, TaskResponse
+from app.schemas.task import TaskCreate, TaskResponse, LabeledTask
 from app.schemas.taskLabel import LabelCreate
 from app.schemas.taskReport import CreateTaskReport
 
@@ -172,7 +172,7 @@ async def report_existing_task(task_report: CreateTaskReport, current_user=Depen
 #     except Exception as e:
 #         raise HTTPException(status_code=400, detail=str(e))
 
-@router.get("/labeled", response_model=List[TaskResponse])
+@router.get("/labeled", response_model=List[LabeledTask])
 async def get_user_labeled_tasks_route(
         current_user=Depends(get_current_user),
         db: Session = Depends(db_manager.get_db)
@@ -185,7 +185,7 @@ async def get_user_labeled_tasks_route(
         db (Session): Database session dependency
 
     Returns:
-        List[TaskResponse]: List of tasks labeled by the user
+        List[LabeledTask]: List of tasks labeled by the user with their labels
 
     Raises:
         HTTPException: If fetching labeled tasks fails
@@ -193,7 +193,7 @@ async def get_user_labeled_tasks_route(
     try:
         labeled_tasks = get_user_labeled_tasks(db, current_user.id)
         return [
-            TaskResponse(
+            LabeledTask(
                 id=task.id,
                 type=task.type,
                 data=task.data,
@@ -201,8 +201,8 @@ async def get_user_labeled_tasks_route(
                 title=task.title,
                 description=task.description,
                 tags=task.tags,
-                is_done=task.is_done
-            ) for task in labeled_tasks
+                is_done=task.is_done,
+                label=get_label_by_task(db, task.id).content) for task in labeled_tasks
         ]
     except Exception as e:
         raise HTTPException(

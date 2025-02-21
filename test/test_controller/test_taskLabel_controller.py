@@ -4,7 +4,7 @@ import pytest
 
 from app.DatabaseManager import DatabaseManager
 from app.controller.taskLabel_controller import (
-    list_labeled_tasks_by_user,
+    get_label_by_task,
     submit_label,
     calculate_consensus,
 )
@@ -74,9 +74,9 @@ def test_submit_label_invalid_user_or_task(test_session):
     assert "User not found" in str(exc_info.value)
 
 
-def test_list_labeled_tasks_by_user(test_session):
-    """Test listing labeled tasks by a specific user."""
-    # Create a user and tasks
+def test_get_label_by_task(test_session):
+    """Test getting label for a specific task."""
+    # Create a user and task
     user = User(name="task_labeler", password="password")
     task1 = Task(
         type="classification", 
@@ -86,26 +86,17 @@ def test_list_labeled_tasks_by_user(test_session):
         description="First test task",  # Added description
         tags=["tag1"]
     )
-    task2 = Task(
-        type="classification", 
-        data={"example": "task2"}, 
-        point=10, 
-        title="Second Task",  # Added title
-        description="Second test task",  # Added description
-        tags=["tag2"]
-    )
-    test_session.add_all([user, task1, task2])
+    test_session.add_all([user, task1])
     test_session.commit()
 
-    # Submit labels for the tasks
-    submit_label(db=test_session, user_id=user.id, task_id=task1.id, content="Label for task1")
-    submit_label(db=test_session, user_id=user.id, task_id=task2.id, content="Label for task2")
+    # Submit a label for the task
+    submitted_label = submit_label(db=test_session, user_id=user.id, task_id=task1.id, content="Label for task1")
 
-    # List labeled tasks
-    labeled_tasks = list_labeled_tasks_by_user(db=test_session, user_id=user.id)
-    assert len(labeled_tasks) == 2
-    assert any(label.content == "Label for task1" for label in labeled_tasks)
-    assert any(label.content == "Label for task2" for label in labeled_tasks)
+    # Get the label
+    label = get_label_by_task(db=test_session, task_id=task1.id)
+    assert label is not None
+    assert label.content == "Label for task1"
+    assert label.id == submitted_label.id
 
 
 def test_calculate_consensus(test_session):
@@ -202,14 +193,11 @@ def test_calculate_consensus_not_enough_labels(test_session):
     assert result.is_done is False  # Task should not be marked as done
 
 
-def test_list_labeled_tasks_empty(test_session):
-    """Test listing labeled tasks for a user with no labels."""
-    user = User(name="empty_labeler", password="password")
-    test_session.add(user)
-    test_session.commit()
-
-    labeled_tasks = list_labeled_tasks_by_user(db=test_session, user_id=user.id)
-    assert len(labeled_tasks) == 0
+def test_get_label_by_task_not_found(test_session):
+    """Test getting label for a non-existent task."""
+    with pytest.raises(ValueError) as exc_info:
+        get_label_by_task(db=test_session, task_id=uuid.uuid4())
+    assert "No label found for task" in str(exc_info.value)
 
 
 def test_submit_label_user_not_found(test_session):

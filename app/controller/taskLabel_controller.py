@@ -7,18 +7,24 @@ from app.models import Task, User
 from app.models.TaskLabel import TaskLabel
 
 
-def list_labeled_tasks_by_user(db: Session, user_id: uuid.UUID):
+def get_label_by_task(db: Session, task_id: uuid.UUID):
     """
-    Get all tasks that have been labeled by a specific user.
+    Get the label object for a specific task.
 
     Args:
         db (Session): SQLAlchemy database session
-        user_id (uuid.UUID): ID of the user whose labels to retrieve
+        task_id (uuid.UUID): ID of the task to get the label object for
 
     Returns:
-        list[TaskLabel]: List of task labels created by the user
+        TaskLabel: The label object for the given task
+        
+    Raises:
+        ValueError: If no label found for the task
     """
-    return db.query(TaskLabel).filter(TaskLabel.user_id == user_id).all()
+    label = db.query(TaskLabel).filter(TaskLabel.task_id == task_id).first()
+    if not label:
+        raise ValueError(f"No label found for task {task_id}")
+    return label
 
 
 def submit_label(db: Session, user_id: uuid.UUID, task_id: uuid.UUID, content: str):
