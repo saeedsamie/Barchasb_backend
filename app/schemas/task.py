@@ -146,3 +146,24 @@ class TaskFeedResponse(BaseModel):
         default=False,
         description="Indicates if there are more tasks available"
     )
+
+
+class LabeledTask(TaskResponse):
+    """
+    Schema for a task with its labeling content.
+    Inherits all fields from TaskResponse and adds label field.
+    
+    Attributes:
+        id: UUID of the task
+        type: Type of the task
+        data: Task data in JSON format
+        point: Points awarded for completing the task
+        title: Title of the task
+        description: Detailed description of the task
+        tags: List of tags associated with the task
+        is_done: Whether the task is completed
+        label: The label content submitted by the user for this task
+    """
+    model_config = ConfigDict(from_attributes=True)
+
+    label: str

@@ -93,8 +93,14 @@
           "name": "Create Task",
           "request": {
             "method": "POST",
-            "header": [{"key": "Authorization", "value": "Bearer {{access_token}}"}],
-            "body": {"mode": "raw", "raw": "{\"type\": \"image_classification\", \"data\": \"image_url.jpg\", \"point\": 10, \"tags\": [\"tag1\", \"tag2\"], \"is_done\": false}"},
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{access_token}}"},
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"type\": \"image_classification\", \"data\": \"image_url.jpg\", \"point\": 10, \"title\": \"Classify Image\", \"description\": \"Please classify this image\", \"tags\": [\"tag1\", \"tag2\"], \"is_done\": false}"
+            },
             "url": {
               "raw": "{{base_url}}/tasks/new",
               "host": ["{{base_url}}"],
@@ -112,6 +118,56 @@
               "host": ["{{base_url}}"],
               "path": ["tasks", "feed"],
               "query": [{"key": "limit", "value": "5"}]
+            }
+          }
+        },
+        {
+          "name": "Submit Task Label",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{access_token}}"},
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"task_id\": \"task-uuid\", \"content\": \"label-content\"}"
+            },
+            "url": {
+              "raw": "{{base_url}}/tasks/submit",
+              "host": ["{{base_url}}"],
+              "path": ["tasks", "submit"]
+            }
+          }
+        },
+        {
+          "name": "Report Task Issue",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{access_token}}"},
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"task_id\": \"task-uuid\", \"detail\": \"Issue description\"}"
+            },
+            "url": {
+              "raw": "{{base_url}}/tasks/report",
+              "host": ["{{base_url}}"],
+              "path": ["tasks", "report"]
+            }
+          }
+        },
+        {
+          "name": "Get User's Labeled Tasks",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{access_token}}"}],
+            "url": {
+              "raw": "{{base_url}}/tasks/labeled",
+              "host": ["{{base_url}}"],
+              "path": ["tasks", "labeled"]
             }
           }
         }

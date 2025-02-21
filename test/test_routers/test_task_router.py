@@ -1,4 +1,5 @@
 import uuid
+from pprint import pprint
 
 import pytest
 from fastapi import FastAPI
@@ -13,7 +14,7 @@ app.include_router(t_router)
 app.include_router(u_router)
 client = TestClient(app)
 
-db_manager = DatabaseManager()
+db_manager = DatabaseManager(testing=True)
 
 
 @pytest.fixture(scope="module")
@@ -124,10 +125,6 @@ class TestTaskSubmission:
         task_response = client.post("/tasks/new", json=sample_task)
         task_id = task_response.json()["id"]
 
-        # Include user_id in the payload
-        user_response = client.get("/users/user/", headers=auth_headers)
-        user_id = user_response.json()["id"]
-
         submit_payload = {
             "task_id": task_id,
             "content": {"label": "test_label"}
@@ -138,10 +135,6 @@ class TestTaskSubmission:
 
     def test_submit_task_nonexistent(self, db_session, auth_headers):
         """Test submitting a non-existent task."""
-        # Get current user ID
-        user_response = client.get("/users/user/", headers=auth_headers)
-        user_id = user_response.json()["id"]
-
         submit_payload = {
             "task_id": str(uuid.uuid4()),
             "content": {"label": "test_label"}
@@ -168,10 +161,6 @@ class TestTaskReporting:
         task_response = client.post("/tasks/new", json=sample_task)
         task_id = task_response.json()["id"]
 
-        # Include user_id in the payload
-        user_response = client.get("/users/user/", headers=auth_headers)
-        user_id = user_response.json()["id"]
-
         report_payload = {
             "task_id": task_id,
             "detail": "Issue with task instructions"
@@ -182,9 +171,6 @@ class TestTaskReporting:
 
     def test_report_nonexistent_task(self, db_session, auth_headers):
         """Test reporting a non-existent task."""
-        user_response = client.get("/users/user/", headers=auth_headers)
-        user_id = user_response.json()["id"]
-
         report_payload = {
             "task_id": str(uuid.uuid4()),
             "detail": "Task does not exist"
@@ -207,3 +193,80 @@ class TestTaskReporting:
         }
         response = client.post("/tasks/report", json=report_payload, headers=auth_headers)
         assert response.status_code == 422
+
+
+class TestUserLabeledTasks:
+    def test_get_user_labeled_tasks_success(self, db_session, auth_headers, sample_task):
+        """Test successful retrieval of user's labeled tasks."""
+        # Reset database state
+        db_manager.drop_db()
+        db_manager.init_db()
+
+        # Create new user and get auth token
+        user_data = {
+            "name": "labeled_test_user",
+            "password": "SecureP@ssw0rd!"
+        }
+        signup_response = client.post("/users/signup", json=user_data)
+        assert signup_response.status_code == 201
+
+        login_response = client.post("/users/login", json=user_data)
+        assert login_response.status_code == 200
+        token = login_response.json()["access_token"]
+        auth_headers = {"Authorization": f"Bearer {token}"}
+
+        # Create a task
+        task_response = client.post("/tasks/new", json=sample_task)
+        assert task_response.status_code == 201
+        task_id = task_response.json()["id"]
+
+        # Submit a label for the task
+        submit_payload = {
+            "task_id": task_id,
+            "content": {"label": "test_label"}
+        }
+        submit_response = client.post("/tasks/submit", json=submit_payload, headers=auth_headers)
+        assert submit_response.status_code == 200
+
+        # Get labeled tasks
+        response = client.get("/tasks/labeled", headers=auth_headers)
+        pprint(response.json())
+        assert response.status_code == 200
+
+        tasks = response.json()
+        assert isinstance(tasks, list)
+        assert len(tasks) == 1
+        assert tasks[0]["id"] == task_id
+        assert "type" in tasks[0]
+        assert "data" in tasks[0]
+        assert "point" in tasks[0]
+        assert "label" in tasks[0]
+
+    def test_get_user_labeled_tasks_unauthorized(self, db_session):
+        """Test labeled tasks access without authentication."""
+        response = client.get("/tasks/labeled")
+        assert response.status_code == 401
+        assert response.json()["detail"] == "Not authenticated"
+
+    def test_get_user_labeled_tasks_empty(self, db_session, auth_headers):
+        """Test when user has no labeled tasks."""
+        # Reset database state and create new user
+        db_manager.drop_db()
+        db_manager.init_db()
+
+        # Create new user and get auth token
+        user_data = {
+            "name": "test_user_empty",
+            "password": "SecureP@ssw0rd!"
+        }
+        signup_response = client.post("/users/signup", json=user_data)
+        assert signup_response.status_code == 201
+
+        login_response = client.post("/users/login", json=user_data)
+        assert login_response.status_code == 200
+        token = login_response.json()["access_token"]
+        auth_headers = {"Authorization": f"Bearer {token}"}
+
+        response = client.get("/tasks/labeled", headers=auth_headers)
+        assert response.status_code == 200
+        assert response.json() == []

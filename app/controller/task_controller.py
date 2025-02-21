@@ -1,4 +1,5 @@
 import uuid
+from typing import List, Type
 
 from sqlalchemy.orm import Session
 
@@ -49,7 +50,8 @@ def get_task_feed(user_id: uuid, db: Session):
         return []
 
 
-def add_task(db: Session, type: str, data: dict, point: int, title: str, description: str, is_done: bool = False, tags: list = None):
+def add_task(db: Session, type: str, data: dict, point: int, title: str, description: str, is_done: bool = False,
+             tags: list = None):
     """
     Create a new task in the database.
 
@@ -67,12 +69,12 @@ def add_task(db: Session, type: str, data: dict, point: int, title: str, descrip
         Task: The created task object
     """
     task = Task(
-        type=type, 
-        data=data, 
-        point=point, 
+        type=type,
+        data=data,
+        point=point,
         title=title,
         description=description,
-        is_done=is_done, 
+        is_done=is_done,
         tags=tags or []
     )
     db.add(task)
@@ -103,6 +105,7 @@ def mark_task_done(db: Session, task_id: uuid.UUID):
     db.refresh(task)
     return task
 
+
 # def update_task_status(db: Session, task_id: str, new_status: str):
 #     """
 #     Update the status of a task.
@@ -123,3 +126,27 @@ def mark_task_done(db: Session, task_id: uuid.UUID):
 #     db.commit()
 #     db.refresh(task)
 #     return task
+def get_user_labeled_tasks(db: Session, user_id: uuid.UUID) -> list[Type[Task]]:
+    """
+    Get all tasks that have been labeled by a specific user.
+
+    Args:
+        db (Session): SQLAlchemy database session
+        user_id (uuid.UUID): ID of the user whose labeled tasks to retrieve
+
+    Returns:
+        List[Task]: List of Task objects that the user has labeled
+
+    Raises:
+        ValueError: If user with given ID is not found
+    """
+    # Query tasks through the TaskLabel relationship
+    labeled_tasks = (
+        db.query(Task)
+        .join(TaskLabel)
+        .filter(TaskLabel.user_id == user_id)
+        .distinct()
+        .all()
+    )
+
+    return labeled_tasks
