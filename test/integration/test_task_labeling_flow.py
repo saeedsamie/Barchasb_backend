@@ -15,7 +15,7 @@ class TestTaskLabelingFlow:
         }
         task_response = test_client.post("/api/v1/tasks/new", json=task_data)
         assert task_response.status_code == 201
-        task_id = task_response.json()["task_id"]
+        task_id = task_response.json()["id"]
 
         # 2. Get task from feed
         feed_response = test_client.get(

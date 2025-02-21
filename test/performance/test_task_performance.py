@@ -25,7 +25,7 @@ class TestTaskPerformance:
         for _ in range(10):
             response = test_client.post("/api/v1/tasks/new", json=sample_task)
             assert response.status_code == 201
-            tasks.append(response.json()["task_id"])
+            tasks.append(response.json()["id"])
 
         def submit_label(task_id):
             return test_client.post(
