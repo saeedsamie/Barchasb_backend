@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 from app.DatabaseManager import DatabaseManager
 from app.controller.taskLabel_controller import submit_label
 from app.controller.taskReport_controller import report_task
-from app.controller.task_controller import add_task, get_task_feed
+from app.controller.task_controller import add_task, get_task_feed, get_user_labeled_tasks
 from app.routers.users_router import get_current_user
 from app.schemas.task import TaskCreate, TaskResponse
 from app.schemas.taskLabel import LabelCreate
@@ -160,6 +160,7 @@ async def report_existing_task(task_report: CreateTaskReport, current_user=Depen
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Report failed: {str(e)}")
 
+
 # @router.put("/update/{task_id}/status", response_model=TaskResponse)
 # def modify_task_status(task_id: str, new_status: str, db: Session = Depends(db_manager.get_db)):
 #     try:
@@ -170,3 +171,41 @@ async def report_existing_task(task_report: CreateTaskReport, current_user=Depen
 #         )
 #     except Exception as e:
 #         raise HTTPException(status_code=400, detail=str(e))
+
+@router.get("/labeled", response_model=List[TaskResponse])
+async def get_user_labeled_tasks_route(
+        current_user=Depends(get_current_user),
+        db: Session = Depends(db_manager.get_db)
+):
+    """
+    Get all tasks that have been labeled by the current user.
+
+    Args:
+        current_user (User): Current authenticated user
+        db (Session): Database session dependency
+
+    Returns:
+        List[TaskResponse]: List of tasks labeled by the user
+
+    Raises:
+        HTTPException: If fetching labeled tasks fails
+    """
+    try:
+        labeled_tasks = get_user_labeled_tasks(db, current_user.id)
+        return [
+            TaskResponse(
+                id=task.id,
+                type=task.type,
+                data=task.data,
+                point=task.point,
+                title=task.title,
+                description=task.description,
+                tags=task.tags,
+                is_done=task.is_done
+            ) for task in labeled_tasks
+        ]
+    except Exception as e:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Failed to fetch labeled tasks: {str(e)}"
+        )

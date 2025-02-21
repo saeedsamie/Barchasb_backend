@@ -6,6 +6,7 @@ from app.controller.task_controller import (
     get_task_feed,
     add_task,
     mark_task_done,
+    get_user_labeled_tasks,
 )
 from app.controller.user_controller import create_user
 from app.models.Task import Task
@@ -138,3 +139,45 @@ def test_mark_task_done(test_session):
     # Verify in the database
     fetched_task = test_session.query(Task).filter(Task.id == task.id).first()
     assert fetched_task.is_done is True
+
+
+def test_get_user_labeled_tasks(test_session):
+    """Test retrieving tasks labeled by a specific user."""
+    db_manager.drop_db()
+    db_manager.init_db()
+
+    # Create a test user
+    user = create_user(test_session, name="label_test_user", password="SecureP@ssw0rd!")
+
+    # Create some tasks
+    task1 = add_task(
+        db=test_session,
+        type="classification",
+        data={"example": "task1"},
+        point=5,
+        title="Task 1",
+        description="First test task",
+        tags=["tag1"],
+    )
+    task2 = add_task(
+        db=test_session,
+        type="classification",
+        data={"example": "task2"},
+        point=10,
+        title="Task 2",
+        description="Second test task",
+        tags=["tag2"],
+    )
+
+    # Add labels for the tasks
+    from app.controller.taskLabel_controller import submit_label
+    submit_label(test_session, user_id=user.id, task_id=task1.id, content="label1")
+    submit_label(test_session, user_id=user.id, task_id=task2.id, content="label2")
+
+    # Get labeled tasks
+    labeled_tasks = get_user_labeled_tasks(test_session, user.id)
+
+    # Verify results
+    assert len(labeled_tasks) == 2
+    assert any(task.id == task1.id for task in labeled_tasks)
+    assert any(task.id == task2.id for task in labeled_tasks)
