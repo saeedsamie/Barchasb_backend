@@ -89,6 +89,56 @@ The backend is designed to support the distributed labeling system with the foll
 
 ## API Endpoints
 
+### Task Management
+
+- **Create a New Task**
+  - **Endpoint**: `POST /tasks/new`
+  - **Description**: Creates a new task.
+  - **Request Body**:
+    - `type` (string): The type of task.
+    - `data` (string): The data associated with the task.
+    - `point` (integer): The points assigned to the task.
+    - `title` (string): The title of the task.
+    - `description` (string): Detailed description of the task.
+    - `tags` (list of strings, optional): Tags associated with the task.
+    - `is_done` (boolean, optional): Status indicating if the task is completed.
+  - **Response**:
+    - Returns the created task with all its properties including the generated ID.
+
+- **Fetch Task Feed**
+  - **Endpoint**: `GET /tasks/feed`
+  - **Description**: Retrieves a feed of available tasks for the authenticated user.
+  - **Query Parameters**:
+    - `limit` (integer): Maximum number of tasks to return (must be > 0).
+  - **Response**:
+    - List of tasks, each containing full task details including ID, type, data, points, title, description, and tags.
+
+- **Submit Task Label**
+  - **Endpoint**: `POST /tasks/submit`
+  - **Description**: Submits a label for a task.
+  - **Request Body**:
+    - `task_id` (string): The ID of the task being labeled.
+    - `content` (string): The label content.
+  - **Response**:
+    - `status` (string): Status of the operation.
+    - `message` (string): Confirmation message with submission ID.
+
+- **Report Task Issue**
+  - **Endpoint**: `POST /tasks/report`
+  - **Description**: Reports an issue with a task.
+  - **Request Body**:
+    - `task_id` (string): The ID of the task being reported.
+    - `detail` (string): Detailed description of the issue.
+  - **Response**:
+    - `status` (string): Status of the operation.
+    - `message` (string): Confirmation message with report ID.
+
+- **Get User's Labeled Tasks**
+  - **Endpoint**: `GET /tasks/labeled`
+  - **Description**: Retrieves all tasks that have been labeled by the authenticated user.
+  - **Response**:
+    - List of tasks with full details including ID, type, data, points, title, description, tags, and completion status.
+
 ### User Management
 
 - **Register a New User**
@@ -109,7 +159,17 @@ The backend is designed to support the distributed labeling system with the foll
     - `name` (string): The user's name.
     - `password` (string): The user's password.
   - **Response**:
-    - `access_token` (string): The JWT access token for the authenticated user.
+    - `access_token` (string): The JWT access token for authentication.
+
+- **Get Leaderboard**
+  - **Endpoint**: `GET /users/leaderboard`
+  - **Description**: Retrieves a list of users sorted by points.
+  - **Response**:
+    - List of users, each containing:
+      - `id` (string): User's unique identifier.
+      - `name` (string): User's name.
+      - `points` (integer): User's points.
+      - `labeled_count` (integer): Number of tasks labeled by the user.
 
 - **Get User Information**
   - **Endpoint**: `GET /users/user/`
@@ -118,54 +178,24 @@ The backend is designed to support the distributed labeling system with the foll
     - `id` (string): The user's unique identifier.
     - `name` (string): The user's name.
     - `points` (integer): The user's points.
-    - `label_count` (integer): The count of labels submitted by the user.
+    - `label_count` (integer): Number of tasks labeled by the user.
 
 - **Update User Information**
   - **Endpoint**: `PUT /users/user/`
   - **Description**: Updates the authenticated user's information.
   - **Request Body**:
-    - `new_name` (string, optional): The new name for the user.
+    - `new_name` (string): The new name for the user.
   - **Response**:
-    - `id` (string): The user's unique identifier.
-    - `name` (string): The updated name of the user.
-    - `points` (integer): The user's points.
-    - `label_count` (integer): The count of labels submitted by the user.
+    - Updated user information including ID, name, points, and label count.
 
 - **Change User Password**
   - **Endpoint**: `PUT /users/user/password`
   - **Description**: Changes the authenticated user's password.
   - **Request Body**:
-    - `new_password` (string): The new password for the user.
+    - `new_password` (string): The new password.
   - **Response**:
-    - `id` (string): The user's unique identifier.
-    - `result` (string): Confirmation message indicating the password was updated.
-
-### Task Management
-
-- **Create a New Task**
-  - **Endpoint**: `POST /tasks/new`
-  - **Description**: Creates a new task.
-  - **Request Body**:
-    - `type` (string): The type of task.
-    - `data` (string): The data associated with the task.
-    - `point` (integer): The points assigned to the task.
-    - `tags` (list of strings, optional): Tags associated with the task.
-    - `is_done` (boolean, optional): Status indicating if the task is completed.
-  - **Response**:
-    - `status` (string): Status of the operation.
-    - `task_id` (string): The unique identifier of the created task.
-
-- **Fetch Task Feed**
-  - **Endpoint**: `GET /tasks/feed`
-  - **Description**: Retrieves a feed of available tasks.
-  - **Query Parameters**:
-    - `limit` (integer): The number of tasks to retrieve.
-  - **Response**:
-    - A list of tasks, each containing:
-      - `type` (string): The type of task.
-      - `data` (string): The data associated with the task.
-      - `point` (integer): The points assigned to the task.
-      - `tags` (list of strings): Tags associated with the task.
+    - `id` (string): The user's ID.
+    - `result` (string): Confirmation message.
 
 ---
 
